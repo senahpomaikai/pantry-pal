@@ -52,7 +52,28 @@ export function readFlags(): Flags {
   return parseFlags(window.location.search, session);
 }
 
+/**
+ * Everything that differs between variants lives here. To change variant B, edit its row
+ * (see docs/AB_VARIANTS.md, "How to change variant B").
+ */
+export interface VariantConfig {
+  /** Centre "+" tab in the tab bar that opens the Add sheet. */
+  addTab: boolean;
+  /** "Add" button in the My pantry header that opens the Add sheet. */
+  pantryAddButton: boolean;
+  /** Show the "Recipes › Write a recipe" group in the Add sheet. */
+  addSheetRecipes: boolean;
+  /** Screen the add sheet opens over for ?screen=add (where the variant's add entry point lives). */
+  addSheetOver: 'home' | 'pantry';
+}
+
+export const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
+  a: { addTab: true, pantryAddButton: false, addSheetRecipes: true, addSheetOver: 'home' },
+  b: { addTab: false, pantryAddButton: true, addSheetRecipes: false, addSheetOver: 'pantry' },
+};
+
 export const FlagsContext = createContext<Flags>(parseFlags(''));
 
 export const useFlags = () => useContext(FlagsContext);
 export const useVariant = () => useContext(FlagsContext).variant;
+export const useVariantConfig = () => VARIANT_CONFIG[useVariant()];
