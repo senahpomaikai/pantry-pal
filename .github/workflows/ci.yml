@@ -28,6 +28,13 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Upload build for PR review
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
       - name: End-to-end tests
