@@ -1,0 +1,87 @@
+/* Web-only layout and interaction states. Nothing here changes the prototype's look on touch devices. */
+
+/* ---------- page ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+html, body { height: 100%; }
+body {
+  background: var(--backdrop);
+  font-family: var(--font);
+  overscroll-behavior: none;
+}
+* { -webkit-tap-highlight-color: transparent; }
+button, a, input, select, textarea, label { touch-action: manipulation; }
+.app { font-family: var(--font); }
+.app .scroll { overscroll-behavior: contain; }
+
+/* ---------- full-bleed (viewport <= 480px, or ?frame=0) ---------- */
+.stage.bleed {
+  position: fixed;
+  inset: 0;
+  background: var(--white);
+}
+.stage.bleed .app {
+  width: 100%;
+  height: 100dvh;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  padding: var(--sat) env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+}
+.stage.bleed .app:not(:has(.tabbar)) { padding-bottom: var(--sab); }
+.stage.bleed .tabbar { padding-bottom: max(16px, var(--sab)); }
+.stage.bleed .sheet { padding-bottom: calc(28px + var(--sab)); }
+.stage.bleed .toast { bottom: calc(94px + var(--sab)); }
+
+/* The tour sits under the top strip (top:44px in the prototype). */
+.app { --sat: 0px; --sab: 0px; }
+.app .overlay.onboard { top: calc(44px + var(--sat)); }
+.app.no-strip .overlay.onboard { top: var(--sat); }
+
+/* ---------- desktop phone frame (viewport > 480px) ---------- */
+.stage.framed {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--backdrop);
+}
+.stage.framed .frame {
+  flex: none;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(29, 59, 40, .14), 0 24px 60px -20px rgba(29, 59, 40, .35);
+  /* zoom (not transform) re-lays out at the smaller size, so text stays crisp for eye tracking */
+  zoom: var(--frame-scale, 1);
+}
+
+/* ---------- variant B: four-tab bar ---------- */
+.tabbar.no-add { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* ---------- keyboard focus ---------- */
+:focus:not(:focus-visible) { outline: none; }
+:focus-visible { outline: 2.5px solid var(--emerald); outline-offset: 2px; }
+.input:focus-visible { outline-offset: 1px; }
+.screen.scan :focus-visible, .toast :focus-visible { outline-color: var(--cream); }
+
+/* ---------- mouse hover / press (only on devices that can hover) ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover, .chip:hover, .rcard:hover, .mini:hover, .lrow:hover { filter: brightness(.965); }
+  .btn-primary:not(:disabled):hover, .chip.on:hover, .seg button.on:hover { filter: brightness(1.25); }
+  .btn-ghost:not(:disabled):hover, .icon-btn:hover, .link:not(:disabled):hover, .taskbtn:hover, .stamp:hover,
+  .group .lrow:hover, .prow:hover, .tab:hover, .seg button:not(.on):hover, .action:hover {
+    filter: none;
+    background-color: rgba(29, 59, 40, .06);
+  }
+  .tab:hover { color: var(--emerald); }
+  .tab:hover .addbtn { filter: brightness(1.25); }
+  .screen.scan .btn-ghost:hover, .screen.scan .icon-btn:hover { background-color: rgba(254, 248, 238, .12); }
+  .action:hover { text-decoration-color: var(--emerald); }
+  .switch:hover { filter: brightness(.95); }
+  .btn:not(:disabled):active, .chip:active, .rcard:active, .lrow:active, .prow:active, .mini:active { filter: brightness(.92); }
+  .btn-primary:not(:disabled):active { filter: brightness(1.4); }
+}

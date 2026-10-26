@@ -1,0 +1,23 @@
+/* Design tokens from design-source/Library.dc.html (v0.4). Used by web-only rules in app.css;
+   the verbatim prototype.css keeps its literal hex values. */
+:root {
+  --white: #FFFFFF;        /* ground */
+  --cream: #FEF8EE;        /* tiles, chips */
+  --emerald: #1D3B28;      /* main action, selected */
+  --butter: #FCEBD0;       /* secondary buttons */
+  --terracotta: #B84D24;   /* use soon */
+  --sky-tint: #DDE3EC;     /* goals, progress */
+  --sky-blue: #B1BACA;     /* saved stat */
+  --pale-lime: #E1CC96;    /* used-up stat */
+  --chartreuse: #BA9F38;   /* accents, cooked stat */
+  --row-line: #EFE3C2;     /* dividers */
+  --muted: #4F5A4F;        /* muted text */
+  --field-border: #6B7A6E;
+  --placeholder: #F5EBD0;
+  --deep-terracotta: #8A3A12;
+  --apricot: #F3C9A5;
+
+  /* web-only */
+  --backdrop: #D8D2C7;     /* warm gray behind the desktop phone frame */
+  --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}

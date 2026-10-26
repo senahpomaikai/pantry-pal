@@ -17,7 +17,7 @@ export function TabBar() {
     </button>
   );
   return (
-    <nav className="tabbar" aria-label="Main">
+    <nav className={'tabbar' + (addTab ? '' : ' no-add')} aria-label="Main">
       {TABS.slice(0, 2).map(tab)}
       {/* Variant A: centre "+" opens the Add sheet. Variant B removes it (see variants.ts). */}
       {addTab && (
