@@ -1,11 +1,8 @@
 name: Deploy to GitHub Pages
 
-# main is published at the site root. Every test-* tag is also rebuilt into /r/<tag>/,
-# so each user-test round keeps a frozen URL even after main moves on.
 on:
   push:
     branches: [main]
-    tags: ['test-*']
   workflow_dispatch:
 
 permissions:
@@ -20,34 +17,21 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - name: Build main
-        run: |
-          npm ci
-          BASE_PATH="/${{ github.event.repository.name }}/" npm run build
-          mkdir -p site && cp -R dist/. site/
-      - name: Build frozen test-round tags
-        run: |
-          for tag in $(git tag --list 'test-*'); do
-            echo "::group::$tag"
-            git worktree add --detach "wt/$tag" "$tag"
-            (cd "wt/$tag" && npm ci && BASE_PATH="/${{ github.event.repository.name }}/r/$tag/" npm run build)
-            mkdir -p "site/r/$tag" && cp -R "wt/$tag/dist/." "site/r/$tag/"
-            echo "::endgroup::"
-          done
+      - run: npm ci
+      - run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: dist
 
   deploy:
     needs: build

@@ -1,4 +1,4 @@
-/* Design tokens from design-source/Library.dc.html (v0.4). Used by web-only rules in app.css;
+/* Design tokens from the prototype's design library (v0.4). Used by web-only rules in app.css;
    the verbatim prototype.css keeps its literal hex values. */
 :root {
   --white: #FFFFFF;        /* ground */

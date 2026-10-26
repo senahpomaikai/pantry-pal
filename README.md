@@ -1,65 +1,53 @@
-# Pantry Pal: lo-fi prototype (web)
+# Pantry Pal
 
-Pantry Pal is a food-waste and recipe app: *cook what you already have*. This repo is the BYU IS 551 team's
-**user-testing build**, a mobile-first web port of the lo-fi prototype in [`design-source/Main.dc.html`](design-source/Main.dc.html).
-Testers need only a URL. It runs in UXtweak and on a laptop for eye tracking.
+A clickable prototype of Pantry Pal, an app for cooking what you already have, built for our IS 551 user tests.
 
-- **Live (main):** https://senahpomaikai.github.io/pantry-pal/
-- **Frozen test-round builds:** `https://senahpomaikai.github.io/pantry-pal/r/<tag>/` (see [docs/DEPLOY.md](docs/DEPLOY.md))
+**Open the app:** https://senahpomaikai.github.io/pantry-pal/
 
-Nothing is stored. Refreshing the page starts a fresh session, as the prototype promises.
+It works on a phone or a laptop. Nothing a tester does is saved, so refreshing the page starts fresh.
 
-## Run it
+## The two versions (A/B test)
+
+The versions differ only in **how you add groceries**:
+
+| | Link | How you add groceries |
+|---|---|---|
+| **Version A** | https://senahpomaikai.github.io/pantry-pal/?v=a | A big round **+** button in the middle of the bottom bar |
+| **Version B** | https://senahpomaikai.github.io/pantry-pal/?v=b | No + button. An **Add** button at the top of the Pantry page |
+
+When UXtweak shows the task instructions itself, add `&task=0` to the end of the link so testers don't see them twice.
+
+The step-by-step plan is in [docs/Pantry_Pal_Next_Steps.pdf](docs/Pantry_Pal_Next_Steps.pdf).
+
+---
+
+## For developers
 
 Requires Node 20+.
 
 ```sh
 npm install
-npm run dev          # dev server at http://localhost:5173/pantry-pal/
-npm run build        # typecheck + production build into dist/
-npm test             # unit tests (Vitest)
-npm run e2e          # end-to-end tests (Playwright; run `npx playwright install chromium` once, and build first)
-npm run lint
-npm run screenshots  # build, then save 390x844 @2x PNGs to screenshots/{a,b}/ for UXtweak image tests
+npm run dev          # http://localhost:5173/pantry-pal/
+npm test             # unit tests
+npm run e2e          # Playwright (build first; `npx playwright install chromium` once)
+npm run screenshots  # 390x844 @2x PNGs for UXtweak image tests → screenshots/{a,b}/
 ```
 
-## Query parameters
+Pushing to `main` deploys to GitHub Pages in about a minute. CI runs typecheck, lint, unit tests, build and e2e.
+**Don't push to `main` on testing days**, so every tester sees the same app.
 
-Read once on page load. Combine freely, e.g. `?v=b&task=0&screen=pantry`.
+**Query parameters**
 
-| Param | Values | Behavior |
+| Param | Values | Effect |
 |---|---|---|
-| `v` | `a` (default), `b` | A/B variant ([docs/AB_VARIANTS.md](docs/AB_VARIANTS.md)). Sets `data-variant` on `<html>`. Remembered for the browser tab's session, so a refresh keeps it. |
-| `task` | `1` (default), `0` | `0` hides the test-task layer: top strip, welcome notice, tour, task sheet, completion modal. Use when UXtweak supplies the task text. |
-| `intro` | `1` (default), `0` | `0` skips the welcome notice and tour only. |
-| `frame` | `1` (default), `0` | `0` turns off the desktop phone frame (the app fills the window). |
-| `screen` | `home`, `pantry`, `recipes`, `me`, `scan`, `scanresult`, `add`, `recipe`, `cook`, `share` | Deep link with seed data. `recipe`, `cook` and `share` use `id=frittata` unless you pass another `id` (`quesadilla`, `chickenrice`, `friedrice`, `pasta`, `smoothie`, `orzo`, `tacos`). `add` opens the Add sheet over Home (A) or My pantry (B). |
-| `id` | recipe id | Used with `screen=recipe|cook|share`. |
+| `v` | `a` (default), `b` | Version. Remembered for the browser tab, so a refresh keeps it. |
+| `task` | `0` | Hide the test-task layer (top strip, welcome, tour, task sheet, completion modal) |
+| `intro` | `0` | Skip only the welcome notice and tour |
+| `frame` | `0` | No phone frame on desktop |
+| `screen` | `home` `pantry` `recipes` `me` `scan` `scanresult` `add` `recipe` `cook` `share` | Open straight to a screen. `recipe`/`cook`/`share` take `id=` (default `frittata`) |
 
-Typical UXtweak website-test URL: `https://senahpomaikai.github.io/pantry-pal/r/test-r1-pilot1/?v=a&task=0`
+**Changing version B:** edit the `b` row of `VARIANT_CONFIG` in [`src/variants.ts`](src/variants.ts)
+(`addTab`, `pantryAddButton`, `addSheetRecipes`). Then update the variant B test in `e2e/test-task.spec.ts`.
 
-## Layout
-
-- Phones (viewport ≤ 480px wide): full-bleed app, `100dvh`, respects safe-area insets.
-- Laptops and desktops: a 390×844 phone frame centred on a warm-gray backdrop, scaled to fit the window height
-  (fully visible on a 768px-tall laptop, no page scrollbars), which works well for eye tracking.
-
-## Code map
-
-```
-src/state/      types, seed data, reducer, selectors, deep links: pure TS, no React/DOM (React Native-ready)
-src/store.tsx   useReducer + context, task-complete and toast effects
-src/variants.ts query-param flags + VARIANT_CONFIG (everything that differs between A and B)
-src/screens/    one file per screen
-src/components/ shared UI (tab bar, sheets, chips, chrome, phone frame…)
-src/styles/     prototype.css (verbatim from the prototype), tokens.css, app.css (web-only layout/states)
-e2e/            Playwright tests (the test task in both variants)
-scripts/        screenshots.ts
-design-source/  the original prototype (read-only reference, never edited)
-docs/           assignment PDFs, PARITY, AB_VARIANTS, BRANCHING, TEST_LOG, DEPLOY
-```
-
-## Contributing
-
-Read [docs/BRANCHING.md](docs/BRANCHING.md). Short-lived branches, PRs into `main`, CI must be green.
-When you change behavior, update [docs/PARITY.md](docs/PARITY.md).
+**Code map:** `src/state/` holds the pure logic (seed data, reducer, selectors). `src/screens/` has one file per screen,
+`src/components/` holds shared UI, and `src/styles/prototype.css` is the prototype's stylesheet, copied unchanged.

@@ -1,4 +1,4 @@
-// Query-parameter flags, read once on load. See README "Query parameters" and docs/AB_VARIANTS.md.
+// Query-parameter flags, read once on load. See README "Query parameters".
 import { createContext, useContext } from 'react';
 import { isDeepScreen, type DeepScreen } from './state/deeplink';
 
@@ -54,7 +54,7 @@ export function readFlags(): Flags {
 
 /**
  * Everything that differs between variants lives here. To change variant B, edit its row
- * (see docs/AB_VARIANTS.md, "How to change variant B").
+ * (see README, "Changing version B").
  */
 export interface VariantConfig {
   /** Centre "+" tab in the tab bar that opens the Add sheet. */
