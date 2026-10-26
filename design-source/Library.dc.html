@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pantry Pal design library</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;family=Caveat:wght@600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+.lib{width:1240px;height:2540px;background:#FEF8EE;color:#1D3B28;font-family:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.4;padding:48px 56px;display:flex;flex-direction:column;gap:32px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.blk{display:flex;flex-direction:column;gap:14px;background:#fff;border-radius:16px;padding:20px}
+.blk h3{margin:0;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#4F5A4F;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sw{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#4F5A4F;width:118px}
+.sw b{color:#1D3B28;font-size:13px;font-weight:600}
+.sw span{height:44px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(29,59,40,.12)}
+.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i-sm{width:18px;height:18px}
+.i-xs{width:14px;height:14px;stroke-width:2.2}
+.stamp{font-family:'Caveat',cursive;font-size:20px;font-weight:700;color:#4F5A4F;background:none;border:1.5px dashed #BA9F38;border-radius:8px;padding:0 10px;min-height:36px;display:inline-flex;align-items:center;gap:6px}
+.btn{min-height:48px;border-radius:12px;border:none;background:#FCEBD0;font:inherit;font-weight:600;font-size:16px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;color:#1D3B28}
+.btn:disabled{opacity:.45}
+.btn-primary{background:#1D3B28;color:#FEF8EE}
+.btn-ghost{background:transparent}
+.link{min-height:44px;padding:0 4px;border:none;background:none;font:inherit;font-size:14px;font-weight:600;color:#1D3B28;display:inline-flex;align-items:center;gap:2px}
+.action{min-height:44px;padding:0 2px;border:none;background:none;font:inherit;font-size:14px;font-weight:600;color:#1D3B28;display:inline-flex;align-items:center;gap:6px;text-decoration:underline;text-decoration-color:#BA9F38;text-decoration-thickness:2px;text-underline-offset:4px}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:none;background:transparent;display:inline-flex;align-items:center;justify-content:center;color:#1D3B28}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:none;background:#FEF8EE;box-shadow:inset 0 0 0 1px rgba(29,59,40,.16);font:inherit;font-size:14px;font-weight:500;color:#1D3B28;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:#1D3B28;box-shadow:none;color:#FEF8EE;font-weight:600}
+.tag{font-size:13px;font-weight:500;color:#4F5A4F;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.tag.warn{font-size:12px;font-weight:600;background:#F3C9A5;color:#6B2E0F;border:1.5px solid #B84D24;border-radius:999px;padding:2px 8px 2px 6px}
+.tag.warn::before{content:'';flex:none;width:11px;height:11px;box-sizing:border-box;border:1.5px solid #B84D24;border-radius:50%;background:linear-gradient(#B84D24,#B84D24) 3.25px 1px/1.5px 3.75px no-repeat,linear-gradient(#B84D24,#B84D24) 3.25px 3.25px/3.25px 1.5px no-repeat}
+.tag.done{font-size:12px;font-weight:600;background:#1D3B28;color:#FEF8EE;border-radius:999px;padding:3px 9px}
+.soonline{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#8A3A12}
+.soonline svg{color:#B84D24}
+.ph{background:#F5EBD0;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#4F5A4F;font-family:'Caveat',cursive;font-size:17px;flex-shrink:0}
+.rcard{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:#FEF8EE;border-radius:14px;padding:10px;font:inherit;color:inherit}
+.prow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px 12px;min-height:64px}
+.lrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:#FEF8EE;border:none;border-radius:14px;padding:0 14px;min-height:56px;font:inherit;font-weight:500;color:inherit}
+.group{background:#FEF8EE;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.group .prow + .prow,.group .lrow + .lrow{border-top:1px solid #EFE3C2}
+.group .lrow{background:transparent;border-radius:0}
+.stat{background:#FEF8EE;border-radius:14px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;width:110px}
+.stat .dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.stat b{font-size:22px;font-weight:700;line-height:1.1}
+.input{width:100%;min-height:48px;border:1.5px solid #6B7A6E;border-radius:10px;padding:0 14px;font:inherit;font-size:16px;background:#fff;color:#1D3B28}
+.input::placeholder{color:#6B7A6E}
+.input[aria-invalid="true"]{border:2.5px solid #1D3B28}
+select.input{padding:0 8px}
+.label{font-size:14px;font-weight:600}
+.field{display:flex;flex-direction:column;gap:6px}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#FEF8EE;box-shadow:inset 0 0 0 1px rgba(29,59,40,.1);border-radius:12px;padding:4px}
+.seg button{min-height:44px;border:none;border-radius:9px;background:transparent;font:inherit;font-weight:500;font-size:14px;color:#4F5A4F}
+.seg button.on{background:#1D3B28;color:#FEF8EE;font-weight:600}
+.tabbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid #EFE3C2;background:#fff;padding:4px}
+.tab{min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:inherit;font-size:11px;font-weight:500;background:none;border:none;color:#4F5A4F}
+.tab.on{color:#1D3B28;font-weight:700}
+.addbtn{width:44px;height:44px;border-radius:50%;background:#1D3B28;color:#FEF8EE;display:flex;align-items:center;justify-content:center}
+.check{width:26px;height:26px;border-radius:50%;border:1.5px solid #6B7A6E;background:#fff;display:flex;align-items:center;justify-content:center;flex:none;color:transparent}
+.check.on{background:#1D3B28;border-color:#1D3B28;color:#FEF8EE}
+.switch{width:52px;height:32px;border-radius:16px;border:1.5px solid #6B7A6E;background:#FEF8EE;position:relative;flex:none}
+.switch span{position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;border:1.5px solid #6B7A6E}
+.switch.on{background:#1D3B28;border-color:#1D3B28}
+.switch.on span{left:23px;border-color:#1D3B28}
+.toast{background:#1D3B28;color:#FEF8EE;border-radius:12px;padding:14px 16px;display:flex;gap:10px;align-items:center;font-weight:600}
+.hint{display:flex;gap:10px;align-items:flex-start;background:#DDE3EC;border-radius:12px;padding:12px 14px;color:#1D3B28;font-size:14px}
+.bar{height:8px;border-radius:4px;background:rgba(29,59,40,.14);overflow:hidden}
+.bar span{display:block;height:100%;width:60%;background:#1D3B28;border-radius:4px}
+.num{width:28px;height:28px;border-radius:50%;background:#FEF8EE;box-shadow:inset 0 0 0 1px rgba(29,59,40,.16);color:#1D3B28;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+.err{display:flex;gap:6px;align-items:flex-start;font-size:13px;font-weight:600;color:#1D3B28}
+.miniform{display:flex;flex-direction:column;gap:10px;background:#FEF8EE;border-radius:12px;padding:12px}
+.cbadge{min-width:22px;height:22px;border-radius:11px;background:#1D3B28;color:#FEF8EE;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.inggrid{display:grid;grid-template-columns:minmax(0,1fr) 72px 100px 44px;gap:8px;align-items:center}
+.why{font-size:13px;color:#4F5A4F;text-align:center}
+.muted{color:#4F5A4F}
+.small{font-size:13px}
+.rule{display:flex;gap:10px;align-items:baseline;font-size:14px}
+.rule b{min-width:110px;font-weight:600}
+</style>
+</helmet>
+<div class="lib">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="stamp" style="align-self:flex-start">lo-fi · v0.4</span>
+<h1 style="margin:0;font-size:40px;font-weight:700;letter-spacing:-0.01em">Pantry Pal design library</h1>
+<p style="margin:0;max-width:820px;color:#4F5A4F;font-size:17px">White ground, cream tiles, Emerald for the main action, terracotta only means use soon. Each color has one job, and the words stay short.</p>
+</div>
+
+<div class="blk">
+<h3>Color · one job each</h3>
+<div class="row" style="gap:14px;align-items:flex-start">
+<div class="sw"><span style="background:#FFFFFF"></span><b>White</b>#FFFFFF · ground</div>
+<div class="sw"><span style="background:#FEF8EE"></span><b>Cream</b>#FEF8EE · tiles, chips</div>
+<div class="sw"><span style="background:#1D3B28"></span><b>Emerald</b>#1D3B28 · main action, selected</div>
+<div class="sw"><span style="background:#FCEBD0"></span><b>Butter</b>#FCEBD0 · secondary buttons</div>
+<div class="sw"><span style="background:#B84D24"></span><b>Terracotta</b>#B84D24 · use soon</div>
+<div class="sw"><span style="background:#DDE3EC"></span><b>Sky tint</b>#DDE3EC · goals, progress</div>
+<div class="sw"><span style="background:#B1BACA"></span><b>Sky Blue</b>#B1BACA · saved stat</div>
+<div class="sw"><span style="background:#E1CC96"></span><b>Pale Lime</b>#E1CC96 · used-up stat</div>
+<div class="sw"><span style="background:#BA9F38"></span><b>Chartreuse</b>#BA9F38 · accents, cooked stat</div>
+</div>
+<div class="row" style="gap:14px;align-items:flex-start">
+<div class="sw"><span style="background:#EFE3C2"></span><b>Row line</b>#EFE3C2 · dividers</div>
+<div class="sw"><span style="background:#4F5A4F"></span><b>Muted text</b>#4F5A4F</div>
+<div class="sw"><span style="background:#6B7A6E"></span><b>Field border</b>#6B7A6E</div>
+<div class="sw"><span style="background:#F5EBD0"></span><b>Placeholder</b>#F5EBD0</div>
+<div class="sw"><span style="background:#8A3A12"></span><b>Deep terracotta</b>#8A3A12 · warn text</div>
+<div class="sw"><span style="background:#F3C9A5"></span><b>Apricot</b>#F3C9A5 / #6B2E0F</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+<div class="rule"><b>Borders</b><span class="muted">Only on text fields, unpicked checks, toggles and the use-soon tag.</span></div>
+<div class="rule"><b>Type weight</b><span class="muted">Bold for titles and the main button. Medium for everything else.</span></div>
+<div class="rule"><b>Words</b><span class="muted">Let buttons and layout explain. Add a line only when something is blocked or unclear.</span></div>
+</div>
+</div>
+
+<div class="grid">
+<div class="blk">
+<h3>Type · Figtree</h3>
+<span style="font-size:26px;font-weight:700;line-height:1.15">Recipe title, 26</span>
+<span style="font-size:18px;font-weight:700">Screen and section title, 18</span>
+<span style="font-size:16px;font-weight:600">Card title, 16</span>
+<span>Body, 15 regular</span>
+<span class="small muted">Meta · 25 min · You have 4 of 5</span>
+<span style="font-family:'Caveat',cursive;font-size:20px;color:#4F5A4F">Caveat = prototype notes only</span>
+</div>
+
+<div class="blk">
+<h3>Buttons and links</h3>
+<button class="btn btn-primary">Primary: one per screen</button>
+<div class="row"><button class="btn">Secondary</button><button class="btn btn-ghost">Quiet</button><button class="btn" disabled>Disabled</button></div>
+<span class="why" style="align-self:flex-start">Add a name to continue</span>
+<div class="row"><button class="link">See all<svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button><button class="action"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Custom place</button><button class="icon-btn" aria-label="Save"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z"></path></svg></button><button class="icon-btn" aria-label="Saved" aria-pressed="true"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor"><path d="M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z"></path></svg></button></div>
+<span class="small muted">Link = go somewhere. Underlined action = add or fill. Disabled buttons say why.</span>
+</div>
+
+<div class="blk">
+<h3>Chips, tags, toggles</h3>
+<div class="row"><button class="chip on">Fridge</button><button class="chip">Freezer</button><button class="chip">Pantry</button></div>
+<div class="row"><span class="tag">12 days</span><span class="tag warn">Tomorrow</span><span class="tag done"><svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Done</span></div>
+<div class="row"><button class="switch on" aria-label="On example"><span></span></button><button class="switch" aria-label="Off example"><span></span></button><span class="check on"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span class="check"></span><span class="num">2</span></div>
+<div class="seg"><button class="on">Discover</button><button>Saved</button><button>Mine</button></div>
+<span class="small muted">Normal tags are plain text. Only use-soon gets a pill, with a clock.</span>
+</div>
+
+<div class="blk">
+<h3>Recipe card · grouped rows</h3>
+<div class="rcard"><div class="ph" style="width:64px;height:64px">photo</div><div style="display:flex;flex-direction:column;gap:3px;flex:1"><span style="font-weight:600;font-size:16px">Spinach &amp; Tomato Frittata</span><span class="small muted">25 min · You have 4 of 5</span><span class="soonline"><svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Uses up cherry tomatoes</span></div></div>
+<div class="group"><div class="prow"><div class="ph" style="width:44px;height:44px;border-radius:10px"></div><div style="flex:1;display:flex;flex-direction:column"><span style="font-weight:600">Chicken thighs</span><span class="small muted">Fridge · 1 lb</span></div><span class="tag warn">Tomorrow</span></div><div class="prow"><div class="ph" style="width:44px;height:44px;border-radius:10px"></div><div style="flex:1;display:flex;flex-direction:column"><span style="font-weight:600">Eggs</span><span class="small muted">Fridge · 6</span></div><span class="tag">2 wks</span></div></div>
+<span class="small muted">Related rows share one tile with thin dividers.</span>
+</div>
+
+<div class="blk">
+<h3>Forms</h3>
+<div class="field"><label class="label" for="lib-in">Field label</label><input id="lib-in" class="input" placeholder="Placeholder text"></div>
+<div class="field"><span class="label">Progress</span><div class="bar"><span></span></div><span class="small muted">Step 2 of 4 · Ingredients</span></div>
+<div class="ph" style="height:80px">image placeholder</div>
+</div>
+
+<div class="blk">
+<h3>Navigation</h3>
+<div style="display:flex;align-items:center;justify-content:space-between;background:#FCEBD0;border-bottom:1.5px dashed #BA9F38;border-radius:10px 10px 0 0;padding:4px 8px"><span class="stamp">lo-fi prototype</span><span style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 12l3 3 5-6"></path></svg>Test task: 1 of 3</span></div>
+<nav class="tabbar" aria-label="Example tab bar">
+<button class="tab on"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path></svg>Home</button>
+<button class="tab"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M5 10h14M9 6v2M9 13v3"></path></svg>Pantry</button>
+<button class="tab" aria-label="Add"><span class="addbtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span></button>
+<button class="tab"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3z"></path><path d="M5 17a3 3 0 013-3h11"></path></svg>Recipes</button>
+<button class="tab"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Me</button>
+</nav>
+<span class="small muted">Active tab: Emerald and bold. The “+” is the one add button.</span>
+</div>
+
+<div class="blk">
+<h3>Feedback</h3>
+<div class="toast"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color:#FCEBD0"><path d="M5 12l5 5 9-10"></path></svg><span>Baby spinach added to your pantry</span></div>
+<div class="hint"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 12l3 3 5-6"></path></svg><span><b>Your test task:</b> sky marks tasks and goals.</span></div>
+<span class="small muted">Sheets for quick choices. Centered modals only for welcome and test task complete.</span>
+</div>
+
+<div class="blk">
+<h3>Filter accordion</h3>
+<div style="display:flex;gap:8px"><input class="input" aria-label="Search recipes" placeholder="Search recipes" style="flex:1;min-width:0"><button class="btn" style="flex:none;padding:0 12px;gap:6px" aria-expanded="true" aria-label="Filters, 2 on"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>Filters<span class="cbadge">2</span></button></div>
+<div class="row" style="gap:8px"><button class="chip on" aria-pressed="true">Uses what’s expiring</button><button class="chip on" aria-pressed="true">20 min or less</button><button class="chip" aria-pressed="false">I have everything</button><button class="chip" aria-pressed="false">Fits my food preferences</button></div>
+<div style="display:flex;justify-content:flex-end"><button class="link">Clear filters</button></div>
+<span class="small muted">Same pattern on Pantry. Badge counts what’s on; filters stay on when closed.</span>
+</div>
+
+<div class="blk">
+<h3>Custom value</h3>
+<div class="row" style="gap:8px"><button class="chip">Fridge</button><button class="chip on">Garage</button></div>
+<button class="action" style="align-self:flex-start" aria-expanded="true"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Custom place</button>
+<div class="miniform">
+<label class="label" for="lib-cl">Name the place</label>
+<div style="display:flex;gap:8px"><input id="lib-cl" class="input" value="Garage!" aria-invalid="true"><button class="btn btn-primary" style="flex:none">Add</button></div>
+<span class="small muted">7/20</span>
+<span class="err"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16.5v.5"></path></svg>Use letters, numbers and spaces only.</span>
+</div>
+</div>
+
+<div class="blk">
+<h3>Goals and stats</h3>
+<div style="display:flex;flex-direction:column;gap:10px;background:#DDE3EC;border-radius:14px;padding:14px">
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:16px">Use up 5 items</span><span class="small muted">Mark items as used</span></div>
+<div class="bar" style="background:#fff"><span style="width:40%"></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between"><span class="small" style="font-weight:600">2 of 5</span><button class="link">Remove</button></div>
+</div>
+<div class="lrow" style="background:#DDE3EC;min-height:52px"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"></path></svg><span style="flex:1">Set a goal</span><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></div>
+<div class="row" style="gap:8px">
+<div class="stat"><span class="dot" style="background:#E1CC96"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><b>4</b><span class="small muted">used up</span></div>
+<div class="stat"><span class="dot" style="background:#BA9F38"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v3a6 6 0 01-6 6h-4a6 6 0 01-6-6z"></path><path d="M2 11h20"></path></svg></span><b>2</b><span class="small muted">cooked</span></div>
+<div class="stat"><span class="dot" style="background:#B1BACA"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z"></path></svg></span><b>3</b><span class="small muted">saved</span></div>
+</div>
+</div>
+
+<div class="blk">
+<h3>Amount and unit</h3>
+<div class="inggrid small muted" style="font-weight:600;font-size:12px"><span>In this recipe (2)</span><span>Amount</span><span>Unit</span><span></span></div>
+<div class="inggrid" style="padding:8px 0;border-bottom:1px solid #EFE3C2">
+<span style="font-weight:600">Garlic</span>
+<input class="input" style="min-height:44px;padding:0 10px" type="number" value="2" aria-label="Amount of Garlic">
+<select class="input" style="min-height:44px" aria-label="Unit for Garlic"><option>whole</option><option>tsp</option><option>tbsp</option><option>cup</option><option>oz</option><option>lb</option><option selected>clove</option><option>pinch</option></select>
+<button class="icon-btn" aria-label="Remove Garlic"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid #EFE3C2"><span class="check on"><svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span style="flex:1;display:flex;flex-direction:column"><span>Garlic</span><span class="small muted">2 cloves</span></span><span class="small muted">in pantry</span></div>
+<span class="small muted">One row per ingredient. Units pluralize: cup/cups, clove/cloves, pinch/pinches.</span>
+</div>
+
+<div class="blk">
+<h3>Icons · 1.8px line</h3>
+<div class="row" style="gap:14px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"></path><path d="M8 12h8"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"></path><path d="M10 21h4"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v3a6 6 0 01-6 6h-4a6 6 0 01-6-6z"></path><path d="M2 11h20"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"></path><path d="M5 19l8-8"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 006 0l3-3a4 4 0 00-6-6l-1 1"></path><path d="M14 10a4 4 0 00-6 0l-3 3a4 4 0 006 6l1-1"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 12l3 3 5-6"></path></svg>
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+</div>
+<span class="small muted">Scan · type · search · alerts · cook · toss · logo · link · bookmark · filter · goals · test task · use soon.</span>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1240,"height":2540}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
