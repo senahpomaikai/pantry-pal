@@ -17,6 +17,17 @@ Give each tester a direct `/A/` or `/B/` link. The capital letter matters.
 
 The message appears after **Update my pantry** following a cooked recipe, or **I used it** on one item. It counts only food expiring within 3 days. Everything else is the same in both versions.
 
+**Task tracking for UXtweak:** the address changes as a tester moves through the tasks, with no reload and nothing shown on screen. Set each task's success condition to "URL contains" the value below.
+
+| Address ends in | When |
+|---|---|
+| `/B/` (no `task`) | Welcome screen |
+| `?task=1` | After **Go to my pantry** |
+| `?task=2` | Once milk, yogurt, strawberries, ground beef and bread are all in the pantry |
+| `?task=done` | After cooking a recipe and tapping **Update my pantry** with the spinach ticked |
+
+It only moves forward, and works the same in both versions. Logic: [`src/state/task.ts`](src/state/task.ts).
+
 The step-by-step plan is in [docs/Pantry_Pal_Next_Steps.pdf](docs/Pantry_Pal_Next_Steps.pdf).
 
 ---
@@ -43,6 +54,7 @@ Pushing to `main` deploys to GitHub Pages in about a minute. CI runs typecheck, 
 | `intro` | `0` | Skip the welcome screen and household setup |
 | `frame` | `0` | No phone frame on desktop |
 | `screen` | `home` `pantry` `recipes` `me` `scan` `scanresult` `add` `recipe` `cook` `share` | Open straight to a screen. `recipe`/`cook`/`share` take `id=` (default `frittata`) |
+| `task` | set by the app | Test progress for UXtweak (see above). Ignored on load. If UXtweak misses the changes, switch `HISTORY_METHOD` in [`src/store.tsx`](src/store.tsx) to `pushState` |
 
 **Versions:** each is its own build (`scripts/build.mjs`), so a tester can't switch. What differs lives in `VARIANT_CONFIG` in [`src/variants.ts`](src/variants.ts).
 

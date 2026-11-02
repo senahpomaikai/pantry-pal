@@ -113,7 +113,12 @@ export interface Toast {
 
 export type NavDirection = 'forward' | 'back' | 'none';
 
+/** The test task shown in the URL's ?task= value. '' is the welcome screen. */
+export type TaskStage = '' | '1' | '2' | 'done';
+
 export interface AppState {
+  /** Test progress, for UXtweak. Only ever written to the URL. */
+  task: TaskStage;
   screen: ScreenName;
   stack: StackEntry[];
   showWelcome: boolean;
