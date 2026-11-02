@@ -12,7 +12,7 @@ const StoreContext = createContext<Store | null>(null);
 
 export function initState(flags: Flags): AppState {
   let st = createInitialState();
-  if (!flags.intro) st = { ...st, showSetup: false };
+  if (!flags.intro) st = { ...st, showWelcome: false };
   if (flags.screen) st = applyDeepLink(st, flags.screen, flags.id);
   return st;
 }

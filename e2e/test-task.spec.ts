@@ -4,7 +4,10 @@ const A = './A/';
 const B = './B/';
 
 async function finishSetup(page: Page) {
+  await page.getByRole('button', { name: 'Go to my pantry' }).click();
   await expect(page.getByRole('heading', { name: 'Set up your household' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Scan groceries' })).toBeAttached(); // Home stays underneath
+  await expect(page.getByText('My pantry')).toHaveCount(0);
   await page.getByRole('button', { name: '4', exact: true }).click();
   await page.getByRole('button', { name: 'Vegetarian' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -110,6 +113,28 @@ test('the scanner walks through the groceries', async ({ page }) => {
   await page.getByRole('button', { name: 'Add to my pantry' }).click();
   await page.getByRole('button', { name: 'Close scanner' }).click();
   await expect(page.getByText('My pantry')).toBeVisible();
+});
+
+test('setup can be skipped, and the welcome screen stays gone', async ({ page }) => {
+  await page.goto(A);
+  await page.getByRole('button', { name: 'Go to my pantry' }).click();
+  await page.getByRole('button', { name: 'Skip for now' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Go to my pantry' })).toHaveCount(0);
+});
+
+test.describe('with reduced motion', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('the card shows the full numbers straight away', async ({ page }) => {
+    await page.goto(B + '?intro=0');
+    await nav(page).getByRole('button', { name: 'Pantry' }).click();
+    await page.getByRole('button', { name: /Spinach/ }).click();
+    await page.getByRole('button', { name: 'I used it' }).click();
+    await expect(page.getByRole('dialog', { name: 'Your impact' }).locator('.impact-text')).toHaveText(/You saved ~\$\d/);
+    const moving = await page.evaluate(() => document.getAnimations().length);
+    expect(moving).toBe(0);
+  });
 });
 
 test('the homepage offers both versions', async ({ page }) => {

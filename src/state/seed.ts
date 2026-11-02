@@ -58,7 +58,7 @@ export const blankManual = (): ManualForm => ({ name: '', qty: '', loc: 'Fridge'
 
 export function createInitialState(): AppState {
   return {
-    screen: 'home', stack: [], showSetup: true, household: '2', onboard: 0,
+    screen: 'home', stack: [], showWelcome: true, showSetup: false, nav: 'none', household: '2', onboard: 0,
     addSheet: false, shareFor: null, shareTo: [], toast: { text: '', n: 0 }, impact: null, addedNow: 0,
     pantry: PANTRY_SEED.map((p) => ({ ...p })),
     nextId: 20, saved: [], shared: [], mine: [], used: 0, tossed: 0, cooked: 0, usedIds: [], goals: [],

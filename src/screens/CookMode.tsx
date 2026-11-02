@@ -9,10 +9,10 @@ export function CookMode() {
     <div className="screen">
       <div className="topbar"><BackButton label="Exit cooking" icon="close" /><p className="title">{findRecipe(state, state.recipeId)?.title}</p></div>
       <div className="scroll" style={{ justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }} aria-live="polite">
           <span className="muted" style={{ fontWeight: 600 }}>Step {cook.n} of {cook.total}</span>
           <div className="bar"><span style={{ width: cook.pct }} /></div>
-          <p style={{ fontSize: 24, fontWeight: 600, lineHeight: 1.35, margin: '12px 0 0', textWrap: 'pretty' }} aria-live="polite">{cook.text}</p>
+          <p key={cook.n} className="cook-step" style={{ fontSize: 24, fontWeight: 600, lineHeight: 1.35, margin: '12px 0 0', textWrap: 'pretty' }}>{cook.text}</p>
         </div>
         <div className="btn-row">
           <button className="btn" disabled={cook.first} onClick={() => dispatch({ type: 'cookPrev' })}>Back</button>

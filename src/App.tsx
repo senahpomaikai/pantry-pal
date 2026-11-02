@@ -3,6 +3,7 @@ import { AddSheet } from './components/AddSheet';
 import { Onboarding } from './components/Chrome';
 import { ImpactCard } from './components/ImpactCard';
 import { Setup } from './components/Setup';
+import { Welcome } from './components/Welcome';
 import { ShareSheet } from './components/ShareSheet';
 import { TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
@@ -37,12 +38,13 @@ export function App() {
   const { state } = useStore();
   const Screen = SCREENS[state.screen];
   return (
-    <div className="app no-strip" data-variant={VARIANT}>
+    <div className="app no-strip" data-variant={VARIANT} data-nav={state.nav}>
       <Screen />
       <TabBar />
       <AddSheet />
       <ShareSheet />
       <Onboarding />
+      <Welcome />
       <Setup />
       <ImpactCard />
       <Toast />

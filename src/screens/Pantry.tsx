@@ -36,7 +36,7 @@ export function Pantry() {
             <button className="link" onClick={() => dispatch({ type: 'showAll' })}>Clear</button>
           </div>
         )}
-        <div className="group">
+        <div className="group pantry-list">
           {rows.map((p) => (
             <button key={p.id} className="prow" onClick={() => dispatch({ type: 'go', screen: 'item', itemId: p.id })}>
               <div className="ph" style={{ width: 44, height: 44, borderRadius: 10 }} />

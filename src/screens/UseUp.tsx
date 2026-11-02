@@ -11,7 +11,7 @@ export function UseUp() {
       <div className="topbar"><BackButton /><p className="title">Nice cooking!</p></div>
       <div className="scroll">
         <p className="lead">What did you use up?</p>
-        <div className="group">
+        <div className="group useup-list">
           {rows.map((p) => {
             const on = state.useUp.indexOf(p.id) >= 0;
             return (

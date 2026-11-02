@@ -53,6 +53,9 @@ describe('adding groceries', () => {
     st = reducer(st, { type: 'doneAdding' });
     expect(st).toMatchObject({ screen: 'pantry', stack: [], addedNow: 0 });
   });
+  it('leaving the welcome screen stays on Home and opens setup', () => {
+    expect(run([{ type: 'enterApp' }])).toMatchObject({ screen: 'home', showWelcome: false, showSetup: true });
+  });
   it('household setup saves size and preferences', () => {
     const st = run([{ type: 'setHousehold', household: '4' }, { type: 'toggleDiet', diet: 'Vegan' }, { type: 'finishSetup' }]);
     expect(st).toMatchObject({ showSetup: false, household: '4', diet: ['Vegan'] });
