@@ -3,9 +3,8 @@ import { createContext, useContext, useEffect, useReducer, type Dispatch, type R
 import { applyDeepLink } from './state/deeplink';
 import { reducer, type Action } from './state/reducer';
 import { createInitialState } from './state/seed';
-import { task } from './state/selectors';
 import type { AppState } from './state/types';
-import { VARIANT_CONFIG, type Flags } from './variants';
+import type { Flags } from './variants';
 
 interface Store { state: AppState; dispatch: Dispatch<Action> }
 
@@ -13,8 +12,8 @@ const StoreContext = createContext<Store | null>(null);
 
 export function initState(flags: Flags): AppState {
   let st = createInitialState();
-  if (!flags.task || !flags.intro) st = { ...st, showNotice: false, onboard: 0 };
-  if (flags.screen) st = applyDeepLink(st, flags.screen, flags.id, VARIANT_CONFIG[flags.variant].addSheetOver);
+  if (!flags.intro) st = { ...st, showSetup: false };
+  if (flags.screen) st = applyDeepLink(st, flags.screen, flags.id);
   return st;
 }
 
@@ -22,12 +21,6 @@ const TOAST_MS = 2600;
 
 export function StoreProvider({ flags, children }: { flags: Flags; children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, flags, initState);
-
-  // Replaces the prototype's componentDidUpdate: open the completion modal once all 3 task steps are done.
-  const done = task(state).done;
-  useEffect(() => {
-    if (done === 3 && !state.taskDoneShown) dispatch({ type: 'taskComplete' });
-  }, [done, state.taskDoneShown]);
 
   // Each new toast restarts the 2.6s timer (the prototype's clearTimeout + setTimeout).
   const { n, text } = state.toast;

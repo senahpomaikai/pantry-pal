@@ -3,18 +3,6 @@ import { Icon } from '../components/Icon';
 import { BackButton } from '../components/TopBar';
 import { EXP_OPTIONS, locations, pantryFilterParts, pantryRows } from '../state/selectors';
 import { useStore } from '../store';
-import { useVariantConfig } from '../variants';
-
-/** Variant B only: an Add button in the pantry header that opens the Add sheet. */
-function PantryAddButton() {
-  const { dispatch } = useStore();
-  if (!useVariantConfig().pantryAddButton) return null;
-  return (
-    <button className="btn filterbtn" style={{ minHeight: 44 }} onClick={() => dispatch({ type: 'openAdd' })} aria-haspopup="dialog">
-      <Icon name="plus" size="sm" />Add
-    </button>
-  );
-}
 
 export function Pantry() {
   const { state, dispatch } = useStore();
@@ -26,7 +14,6 @@ export function Pantry() {
       <div className="topbar">
         {state.stack.length > 0 && <BackButton />}
         <p className="title">My pantry <span className="muted" style={{ fontWeight: 500, fontSize: 15 }}>({state.pantry.length})</span></p>
-        <PantryAddButton />
         <button className="btn filterbtn" style={{ minHeight: 44 }} aria-expanded={state.pFiltersOpen} aria-controls="pantry-filters"
           aria-label={count ? 'Filters, ' + count + ' on' : 'Filters'} onClick={() => dispatch({ type: 'togglePFilters' })}>
           <Icon name="filter" size="sm" />Filters{count > 0 && <span className="cbadge">{count}</span>}

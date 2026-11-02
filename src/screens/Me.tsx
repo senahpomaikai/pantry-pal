@@ -15,7 +15,7 @@ export function Me() {
       <div className="scroll" style={{ gap: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div className="ph" style={{ width: 56, height: 56, borderRadius: '50%' }} />
-          <div style={{ display: 'flex', flexDirection: 'column' }}><span className="h2">Your name</span><span className="muted small">Home cook</span></div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}><span className="h2">Your name</span><span className="muted small">Home cook · household of {state.household}</span></div>
         </div>
         <div className="stats">
           <div className="stat used"><span className="dot"><Icon name="check" size="sm" /></span><b>{state.used}</b><span className="small muted">used up</span></div>

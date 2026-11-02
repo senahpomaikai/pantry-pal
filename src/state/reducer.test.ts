@@ -2,29 +2,93 @@ import { describe, expect, it } from 'vitest';
 import { applyDeepLink } from './deeplink';
 import { reducer, type Action } from './reducer';
 import { createInitialState } from './seed';
-import { task } from './selectors';
 import type { AppState } from './types';
 import { parseFlags } from '../variants';
 
 const run = (actions: Action[], st: AppState = createInitialState()) => actions.reduce(reducer, st);
 
-describe('reducer: core test task', () => {
-  it('scan -> add spinach -> save -> share completes 3 of 3', () => {
-    let st = run([{ type: 'go', screen: 'scan' }, { type: 'simScan' }, { type: 'addScanned' }]);
-    expect(st.screen).toBe('pantry');
-    expect(st.toast.text).toBe('Baby spinach added to your pantry');
-    expect(task(st).done).toBe(1);
-
-    st = run([{ type: 'go', screen: 'recipe', recipeId: 'frittata' }, { type: 'toggleSave' }], st);
-    expect(st.toast.text).toBe('Saved to Recipes › Saved');
-    expect(task(st).done).toBe(2);
-
-    st = run([{ type: 'openShare' }, { type: 'toggleShareTo', name: 'Maya' }, { type: 'toggleShareTo', name: 'Sam' }, { type: 'sendShare' }], st);
-    expect(st.toast.text).toBe('Sent to Maya & Sam (pretend)');
-    expect(st.shareFor).toBeNull();
-    expect(task(st).done).toBe(3);
+describe('adding groceries', () => {
+  it('the scanner walks the groceries and stays open for the next one', () => {
+    let st = run([{ type: 'go', screen: 'scan' }, { type: 'simScan' }]);
+    expect(st).toMatchObject({ screen: 'scanResult', scanLoc: 'Fridge', scanDays: 7 });
+    st = reducer(st, { type: 'addScanned' });
+    expect(st.screen).toBe('scan');
+    expect(st.pantry.at(-1)).toMatchObject({ name: 'Milk', qty: 'Half gallon', loc: 'Fridge', days: 7 });
+    expect(st.toast.text).toBe('Milk added to your pantry');
+    st = run([{ type: 'simScan' }, { type: 'addScanned' }], st);
+    expect(st.pantry.at(-1)?.name).toBe('Yogurt');
   });
+  it('closing the scanner goes to the pantry once something was added', () => {
+    const st = run([{ type: 'go', screen: 'scan' }, { type: 'simScan' }, { type: 'addScanned' }, { type: 'back' }]);
+    expect(st).toMatchObject({ screen: 'pantry', stack: [], addedNow: 0 });
+    expect(run([{ type: 'go', screen: 'scan' }, { type: 'back' }]).screen).toBe('home');
+  });
+  it('the scanned place moves the days, unless they were chosen by hand', () => {
+    const st = run([{ type: 'go', screen: 'scan' }, { type: 'simScan' }, { type: 'setScanLoc', loc: 'Freezer' }]);
+    expect(st.scanDays).toBe(90);
+    expect(run([{ type: 'setScanDays', days: 3 }, { type: 'setScanLoc', loc: 'Fridge' }], st).scanDays).toBe(3);
+  });
+  it('a suggestion fills in the form', () => {
+    const st = run([{ type: 'go', screen: 'manual' }, { type: 'setF', patch: { name: 'grou' } }, { type: 'pickFood', name: 'Ground beef' }]);
+    expect(st.f).toMatchObject({ name: 'Ground beef', qty: '1 lb', loc: 'Fridge', days: 2, picked: 'Ground beef' });
+  });
+  it('changing place moves the days; quantity does not', () => {
+    let st = run([{ type: 'go', screen: 'manual' }, { type: 'pickFood', name: 'Ground beef' }, { type: 'setF', patch: { qty: '3 lb' } }]);
+    expect(st.f.days).toBe(2);
+    st = reducer(st, { type: 'setF', patch: { loc: 'Freezer' } });
+    expect(st.f).toMatchObject({ loc: 'Freezer', days: 120 });
+  });
+  it('days chosen by hand stay put, and a place with no timeline changes nothing', () => {
+    let st = run([{ type: 'go', screen: 'manual' }, { type: 'pickFood', name: 'Eggs' }, { type: 'setF', patch: { loc: 'Freezer' } }]);
+    expect(st.f.days).toBe(21);
+    st = run([{ type: 'setF', patch: { days: 30 } }, { type: 'setF', patch: { loc: 'Pantry' } }], st);
+    expect(st.f.days).toBe(30);
+  });
+  it('the form stays open after adding, and Done goes to the pantry', () => {
+    let st = run([{ type: 'go', screen: 'manual' }, { type: 'pickFood', name: 'Bread' }, { type: 'addManual' }]);
+    expect(st).toMatchObject({ screen: 'manual', addedNow: 1 });
+    expect(st.f.name).toBe('');
+    st = run([{ type: 'setF', patch: { name: 'Plantains' } }, { type: 'addManual' }], st);
+    expect(st.addedNow).toBe(2);
+    st = reducer(st, { type: 'doneAdding' });
+    expect(st).toMatchObject({ screen: 'pantry', stack: [], addedNow: 0 });
+  });
+  it('household setup saves size and preferences', () => {
+    const st = run([{ type: 'setHousehold', household: '4' }, { type: 'toggleDiet', diet: 'Vegan' }, { type: 'finishSetup' }]);
+    expect(st).toMatchObject({ showSetup: false, household: '4', diet: ['Vegan'] });
+  });
+  it("Cook what’s expiring opens Recipes filtered to it", () => {
+    expect(run([{ type: 'setQ', q: 'x' }, { type: 'cookExpiring' }])).toMatchObject({ screen: 'recipes', filters: ['soon'], seg: 'discover', q: '' });
+  });
+});
 
+describe('impact', () => {
+  const cook = (id: string): Action[] => [{ type: 'go', screen: 'recipe', recipeId: id }, { type: 'startCook' }, { type: 'cookNext' }, { type: 'cookNext' }, { type: 'cookNext' }, { type: 'cookNext' }];
+
+  it('updating the pantry after cooking sets the impact', () => {
+    expect(run([...cook('frittata'), { type: 'confirmUse' }]).impact).toEqual({ dollars: 2, lbs: 0.5 });
+  });
+  it('nothing ticked means no impact', () => {
+    const st = run(cook('frittata'));
+    const none = st.useUp.reduce<AppState>((s, id) => reducer(s, { type: 'toggleUseUp', id }), st);
+    expect(reducer(none, { type: 'confirmUse' }).impact).toBeNull();
+  });
+  it('adding food never sets it', () => {
+    expect(run([{ type: 'go', screen: 'manual' }, { type: 'pickFood', name: 'Bread' }, { type: 'addManual' }]).impact).toBeNull();
+  });
+  it('"I used it" sets it for food at risk; "I tossed it" and food not at risk do not', () => {
+    expect(run([{ type: 'go', screen: 'item', itemId: 1 }, { type: 'markItem', kind: 'used' }]).impact).toEqual({ dollars: 1.5, lbs: 1 });
+    expect(run([{ type: 'go', screen: 'item', itemId: 1 }, { type: 'markItem', kind: 'tossed' }]).impact).toBeNull();
+    expect(run([{ type: 'go', screen: 'item', itemId: 10 }, { type: 'markItem', kind: 'used' }]).impact).toBeNull();
+  });
+  it('dismissing clears the card and the pop-up', () => {
+    const st = run([{ type: 'go', screen: 'item', itemId: 1 }, { type: 'markItem', kind: 'used' }, { type: 'dismissImpact' }]);
+    expect(st.impact).toBeNull();
+    expect(st.toast.text).toBe('');
+  });
+});
+
+describe('reducer: items, forms', () => {
   it('manual add trims and resets the form; empty name is a no-op', () => {
     const st0 = createInitialState();
     expect(reducer(st0, { type: 'addManual' })).toBe(st0);
@@ -101,7 +165,6 @@ describe('reducer: items, cooking, goals', () => {
     ]);
     expect(st).toMatchObject({ screen: 'recipe', recipeId: 'mine20', seg: 'mine', saved: ['mine20'] });
     expect(st.mine[0].amts).toEqual([[2, 'cup']]);
-    expect(task(st).g2).toBe(true);
   });
   it('toast clear only applies to the latest message', () => {
     const st = run([{ type: 'photoNope' }, { type: 'photoNope' }]);
@@ -112,18 +175,18 @@ describe('reducer: items, cooking, goals', () => {
 
 describe('deep links and flags', () => {
   it('share opens the share sheet over the recipe', () => {
-    const st = applyDeepLink(createInitialState(), 'share', 'frittata', 'home');
+    const st = applyDeepLink(createInitialState(), 'share', 'frittata');
     expect(st).toMatchObject({ screen: 'recipe', recipeId: 'frittata', shareFor: 'frittata' });
     expect(reducer(st, { type: 'back' }).screen).toBe('recipes');
   });
   it('unknown recipe id falls back to frittata', () => {
-    expect(applyDeepLink(createInitialState(), 'cook', 'nope', 'home').recipeId).toBe('frittata');
+    expect(applyDeepLink(createInitialState(), 'cook', 'nope').recipeId).toBe('frittata');
   });
   it('parses flags with defaults and remembers the variant', () => {
     const mem = new Map<string, string>();
     const store = { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => void mem.set(k, v) };
-    expect(parseFlags('', store)).toMatchObject({ variant: 'a', task: true, intro: true, frame: true, screen: null, id: 'frittata' });
-    expect(parseFlags('?v=b&task=0&frame=0&screen=cook&id=smoothie', store)).toMatchObject({ variant: 'b', task: false, frame: false, screen: 'cook', id: 'smoothie' });
+    expect(parseFlags('', store)).toMatchObject({ variant: 'a', intro: true, frame: true, screen: null, id: 'frittata' });
+    expect(parseFlags('?v=b&frame=0&screen=cook&id=smoothie', store)).toMatchObject({ variant: 'b', frame: false, screen: 'cook', id: 'smoothie' });
     expect(parseFlags('', store).variant).toBe('b');
     expect(parseFlags('?screen=bogus').screen).toBeNull();
   });

@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react';
 import { AddSheet } from './components/AddSheet';
-import { Onboarding, TaskDoneModal, TaskSheet, TopStrip, WelcomeNotice } from './components/Chrome';
+import { Onboarding } from './components/Chrome';
+import { ImpactCard } from './components/ImpactCard';
+import { Setup } from './components/Setup';
 import { ShareSheet } from './components/ShareSheet';
 import { TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
@@ -23,7 +25,7 @@ import { UseUp } from './screens/UseUp';
 import { WriteRecipe } from './screens/WriteRecipe';
 import type { ScreenName } from './state/types';
 import { useStore } from './store';
-import { useFlags } from './variants';
+import { useVariant } from './variants';
 
 const SCREENS: Record<ScreenName, () => ReactElement> = {
   home: Home, pantry: Pantry, item: ItemDetail, scan: Scan, scanResult: ScanResult, manual: AddItem,
@@ -33,19 +35,17 @@ const SCREENS: Record<ScreenName, () => ReactElement> = {
 
 export function App() {
   const { state } = useStore();
-  const { task, variant } = useFlags();
+  const variant = useVariant();
   const Screen = SCREENS[state.screen];
   return (
-    <div className={'app' + (task ? '' : ' no-strip')} data-variant={variant}>
-      {task && <TopStrip />}
+    <div className="app no-strip" data-variant={variant}>
       <Screen />
       <TabBar />
       <AddSheet />
       <ShareSheet />
-      {task && <TaskSheet />}
       <Onboarding />
-      {task && <WelcomeNotice />}
-      {task && <TaskDoneModal />}
+      <Setup />
+      <ImpactCard />
       <Toast />
     </div>
   );

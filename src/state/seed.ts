@@ -1,4 +1,5 @@
 // Seed data and initial state, ported verbatim from the prototype's constructor.
+import { scanFood } from './foods';
 import type { AppState, Diet, Draft, DayForm, GoalPreset, LocForm, ManualForm, PantryItem, Recipe, Unit } from './types';
 
 export const RECIPES: Recipe[] = [
@@ -23,6 +24,7 @@ export const GOALS: GoalPreset[] = [
 
 export const DIETS: Diet[] = ['Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free', 'Nut-free'];
 export const UNITS: Unit[] = ['whole', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'clove', 'pinch'];
+export const HOUSEHOLD_SIZES = ['1', '2', '3', '4', '5+'];
 export const QUICK_PICKS = ['Spinach', 'Bananas', 'Yogurt', 'Bread'];
 export const SCAN_DAY_PRESETS = [3, 5, 7];
 export const MANUAL_DAY_PRESETS = [2, 5, 7, 14, 30];
@@ -52,16 +54,16 @@ export const blankDraft = (): Draft => ({ title: '', time: 30, serves: 2, ings: 
 export const blankLocForm = (): LocForm => ({ open: false, name: '', err: '' });
 export const blankDayForm = (): DayForm => ({ open: false, num: '', unit: 'days', err: '' });
 export const blankForms = () => ({ locForm: blankLocForm(), dayForm: blankDayForm() });
-export const blankManual = (): ManualForm => ({ name: '', qty: '', loc: 'Fridge', days: 5 });
+export const blankManual = (): ManualForm => ({ name: '', qty: '', loc: 'Fridge', days: 5, daysSet: false, picked: '' });
 
 export function createInitialState(): AppState {
   return {
-    screen: 'home', stack: [], showNotice: true, onboard: 0, showTask: false, taskDone: false, taskDoneShown: false,
-    addSheet: false, shareFor: null, shareTo: [], toast: { text: '', n: 0 },
+    screen: 'home', stack: [], showSetup: true, household: '2', onboard: 0,
+    addSheet: false, shareFor: null, shareTo: [], toast: { text: '', n: 0 }, impact: null, addedNow: 0,
     pantry: PANTRY_SEED.map((p) => ({ ...p })),
     nextId: 20, saved: [], shared: [], mine: [], used: 0, tossed: 0, cooked: 0, usedIds: [], goals: [],
     itemId: null, recipeId: null, cookStep: 0, useUp: [],
-    f: blankManual(), scanLoc: 'Fridge', scanDays: 5, customLocs: [],
+    f: blankManual(), scanLoc: scanFood(0).loc, scanDays: scanFood(0).days.Fridge ?? 5, scanDaysSet: false, scanIdx: 0, customLocs: [],
     q: '', filters: [], filtersOpen: false, seg: 'discover', loc: 'All', exp: 'any', pFiltersOpen: false,
     d: blankDraft(), cStep: 1,
     reminders: true, lead: 2, digest: false, diet: [],

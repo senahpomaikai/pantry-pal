@@ -24,7 +24,7 @@ export function Home() {
 
         <div className="section">
           <div className="sechead">
-            <h2 className="h2">Use these soon</h2>
+            <h2 className="h2">Expiring soon</h2>
             <button className="link" aria-label="See whole pantry" onClick={() => dispatch({ type: 'go', screen: 'pantry' })}>See all<Icon name="chevron" size="sm" /></button>
           </div>
           {soon.length > 0 ? (
@@ -40,6 +40,7 @@ export function Home() {
           ) : (
             <p className="muted" style={{ margin: 0 }}>Nothing is close to expiring.</p>
           )}
+          {soon.length > 0 && <button className="btn btn-block" onClick={() => dispatch({ type: 'cookExpiring' })}><Icon name="pot" size="sm" />Cook what’s expiring</button>}
         </div>
 
         <button className="lrow sky" onClick={() => dispatch({ type: 'go', screen: 'goals' })}>
@@ -48,7 +49,7 @@ export function Home() {
 
         <div className="section">
           <div className="sechead">
-            <h2 className="h2">You can cook now</h2>
+            <h2 className="h2">Cook with what you have</h2>
             <button className="link" aria-label="See all recipes" onClick={() => dispatch({ type: 'go', screen: 'recipes' })}>See all<Icon name="chevron" size="sm" /></button>
           </div>
           {topRecipes(state).map((r) => (

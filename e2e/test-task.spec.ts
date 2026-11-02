@@ -1,67 +1,115 @@
 import { expect, test, type Page } from '@playwright/test';
 
-async function skipIntro(page: Page) {
-  await expect(page.getByRole('heading', { name: 'Welcome! This is a rough draft.' })).toBeVisible();
-  await page.getByRole('button', { name: 'Skip, take me to the app' }).click();
+const A = './?v=a';
+const B = './?v=b';
+
+async function finishSetup(page: Page) {
+  await expect(page.getByRole('heading', { name: 'Set up your household' })).toBeVisible();
+  await page.getByRole('button', { name: '4', exact: true }).click();
+  await page.getByRole('button', { name: 'Vegetarian' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByRole('heading', { name: 'Set up your household' })).toHaveCount(0);
 }
 
-async function saveAndShare(page: Page, recipe: string) {
-  await page.getByRole('navigation', { name: 'Main' }).getByRole('button', { name: 'Recipes' }).click();
-  await page.getByRole('button', { name: new RegExp(recipe) }).click();
-  await page.getByRole('button', { name: 'Save recipe' }).click();
-  await expect(page.getByRole('status')).toHaveText('Saved to Recipes › Saved');
-  await page.getByRole('button', { name: 'Share recipe' }).click();
-  await page.getByRole('button', { name: 'Maya' }).click();
-  await page.getByRole('button', { name: 'Send to 1 friend' }).click();
-}
+const nav = (page: Page) => page.getByRole('navigation', { name: 'Main' });
 
-test('variant A: + tab → scan spinach → save and share a spinach recipe', async ({ page }) => {
-  await page.goto('./?v=a');
-  await skipIntro(page);
-  await expect(page.getByRole('button', { name: /Test task: 1 of 3/ })).toBeVisible();
-
+/** Task 1: type the groceries in, using suggestions. */
+async function addGroceries(page: Page) {
   await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await page.getByRole('button', { name: 'Scan an item' }).click();
-  await page.getByRole('button', { name: 'Pretend to scan: baby spinach' }).click();
-  await page.getByRole('button', { name: 'Add to my pantry' }).click();
-  await expect(page.getByRole('status')).toHaveText('Baby spinach added to your pantry');
-  await expect(page.getByRole('button', { name: /Test task: 1 of 3/ })).toBeVisible();
-
-  await saveAndShare(page, 'Spinach & Tomato Frittata');
-  await expect(page.getByRole('dialog', { name: 'Test task complete!' })).toBeVisible();
-  await page.getByRole('button', { name: 'Keep exploring' }).click();
-  await expect(page.getByRole('button', { name: /Test task: 3 of 3/ })).toBeVisible();
-});
-
-test('variant B: no + tab; pantry Add → type spinach → save and share a spinach recipe', async ({ page }) => {
-  await page.goto('./?v=b');
-  await skipIntro(page);
-  const nav = page.getByRole('navigation', { name: 'Main' });
-  await expect(nav.getByRole('button')).toHaveText(['Home', 'Pantry', 'Recipes', 'Me']);
-
-  await nav.getByRole('button', { name: 'Pantry' }).click();
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Write a recipe' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Type it in' }).click();
-  await page.getByLabel('What is it?').fill('Spinach');
-  await page.getByRole('button', { name: 'Add to my pantry' }).click();
-  await expect(page.getByRole('status')).toHaveText('Spinach added to your pantry');
+  for (const [typed, food] of [['milk', 'Milk'], ['yog', 'Yogurt'], ['straw', 'Strawberries'], ['ground', 'Ground beef'], ['bre', 'Bread']]) {
+    await page.getByLabel('What is it?').fill(typed);
+    await page.getByRole('option', { name: new RegExp(food) }).click();
+    await page.getByRole('button', { name: 'Add to my pantry' }).click();
+    await expect(page.getByRole('status')).toHaveText(food + ' added to your pantry');
+  }
+  await page.getByRole('button', { name: 'Done' }).click();
+  await expect(page.getByText('My pantry')).toBeVisible();
+}
 
-  await saveAndShare(page, 'Green Smoothie');
-  await expect(page.getByRole('dialog', { name: 'Test task complete!' })).toBeVisible();
-});
+/** Task 2: cook a spinach recipe from Home and update the pantry. */
+async function cookFrittata(page: Page) {
+  await nav(page).getByRole('button', { name: 'Home' }).click();
+  await page.getByRole('button', { name: 'Cook what’s expiring' }).click();
+  await page.getByRole('button', { name: /Spinach & Tomato Frittata/ }).click();
+  await page.getByRole('button', { name: /Start cooking/ }).click();
+  for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /^(Next step|I’m done cooking)/ }).click();
+  await expect(page.getByText('What did you use up?')).toBeVisible();
+}
 
-test('variant sticks for the session after a refresh', async ({ page }) => {
-  await page.goto('./?v=b&intro=0');
-  await page.goto('./?intro=0');
-  await expect(page.locator('html')).toHaveAttribute('data-variant', 'b');
-});
+for (const [name, url, showsCard] of [['control', A, false], ['impact message', B, true]] as const) {
+  test(`${name}: Task 1, then Task 2`, async ({ page }) => {
+    await page.goto(url);
+    await finishSetup(page);
 
-test('task=0 hides the test-task layer', async ({ page }) => {
-  await page.goto('./?task=0');
-  await expect(page.getByText('lo-fi prototype')).toHaveCount(0);
+    // Both versions share the same layout.
+    await expect(nav(page).getByRole('button')).toHaveText(['Home', 'Pantry', 'Add', 'Recipes', 'Me']);
+
+    await addGroceries(page);
+    await expect(page.getByRole('dialog')).toHaveCount(0); // adding food never shows the card
+
+    await cookFrittata(page);
+    await page.getByRole('button', { name: 'Update my pantry' }).click();
+
+    const card = page.getByRole('dialog', { name: 'Your impact' });
+    if (showsCard) {
+      await expect(card).toHaveText(/You saved ~\$2 and 0\.5 lbs of food from going to the landfill/);
+      await page.waitForTimeout(3000); // outlasts the 2.6s pop-ups
+      await expect(card).toBeVisible();
+      await page.getByRole('button', { name: 'Done' }).click();
+      await expect(card).toHaveCount(0);
+    } else {
+      await expect(page.getByRole('status')).toHaveText(/Pantry updated/);
+      await expect(card).toHaveCount(0);
+    }
+  });
+}
+
+test('impact message: skipping the pantry update shows nothing', async ({ page }) => {
+  await page.goto(B + '&intro=0');
+  await cookFrittata(page);
+  await page.getByRole('button', { name: 'Skip' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Scan groceries' })).toBeVisible();
+});
+
+test('impact message: "I used it" on food at risk shows the card, "I tossed it" does not', async ({ page }) => {
+  await page.goto(B + '&intro=0');
+  await nav(page).getByRole('button', { name: 'Pantry' }).click();
+  await page.getByRole('button', { name: /Spinach/ }).click();
+  await page.getByRole('button', { name: 'I used it' }).click();
+  await expect(page.getByRole('dialog', { name: 'Your impact' })).toHaveText(/You saved/);
+  await page.getByRole('button', { name: 'Done' }).click();
+  await page.getByRole('button', { name: /Chicken thighs/ }).click();
+  await page.getByRole('button', { name: 'I tossed it' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('suggestions cap at three, and Where moves the days', async ({ page }) => {
+  await page.goto(A + '&intro=0');
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Type it in' }).click();
+  await page.getByLabel('What is it?').fill('ch');
+  await expect(page.getByRole('option')).toHaveCount(3);
+  await page.getByLabel('What is it?').fill('ground');
+  await page.getByRole('option', { name: /Ground beef/ }).click();
+  await expect(page.getByRole('option')).toHaveCount(0);
+  await expect(page.getByLabel('How much? (optional)')).toHaveValue('1 lb');
+  await expect(page.getByRole('group', { name: 'Good for about' }).getByRole('button', { name: '2 days' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('group', { name: 'Where?' }).getByRole('button', { name: 'Freezer' }).click();
+  await expect(page.getByRole('group', { name: 'Good for about' }).getByRole('button', { name: '4 months' })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('the scanner walks through the groceries', async ({ page }) => {
+  await page.goto(A + '&intro=0');
+  await page.getByRole('button', { name: 'Scan groceries' }).click();
+  await page.getByRole('button', { name: 'Pretend to scan: milk' }).click();
+  await page.getByRole('button', { name: 'Add to my pantry' }).click();
+  await expect(page.getByRole('status')).toHaveText('Milk added to your pantry');
+  await page.getByRole('button', { name: 'Pretend to scan: yogurt' }).click();
+  await expect(page.getByText('We found')).toBeVisible();
+  await page.getByRole('button', { name: 'Add to my pantry' }).click();
+  await page.getByRole('button', { name: 'Close scanner' }).click();
+  await expect(page.getByText('My pantry')).toBeVisible();
 });
 
 test.describe('desktop laptop (1366x768)', () => {
