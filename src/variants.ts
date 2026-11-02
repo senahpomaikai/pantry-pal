@@ -1,12 +1,14 @@
-// Query-parameter flags, read once on load. See README "Query parameters".
+/// <reference types="vite/client" />
+// Which version this build is, and query-parameter flags read once on load. See README "Query parameters".
 import { createContext, useContext } from 'react';
 import { isDeepScreen, type DeepScreen } from './state/deeplink';
 
 export type Variant = 'a' | 'b';
 
+/** A = control, B = impact message. Locked in at build time: each version is its own build (see scripts/build.mjs). */
+export const VARIANT: Variant = import.meta.env.VITE_VARIANT === 'b' ? 'b' : 'a';
+
 export interface Flags {
-  /** A/B version. A = control, B = impact message. */
-  variant: Variant;
   /** Show the household setup screen on load. */
   intro: boolean;
   /** Desktop phone frame. */
@@ -15,27 +17,11 @@ export interface Flags {
   id: string;
 }
 
-const VARIANT_KEY = 'pantry-pal:variant';
-
-interface KeyValueStore { getItem(k: string): string | null; setItem(k: string, v: string): void }
-
-/** Parses flags from a query string. The variant is remembered for the session so a refresh keeps it. */
-export function parseFlags(search: string, session?: KeyValueStore): Flags {
+/** Parses flags from a query string. */
+export function parseFlags(search: string): Flags {
   const p = new URLSearchParams(search);
-  const fromUrl = p.get('v')?.toLowerCase();
-  let variant: Variant = 'a';
-  if (fromUrl === 'a' || fromUrl === 'b') {
-    variant = fromUrl;
-    try { session?.setItem(VARIANT_KEY, variant); } catch { /* storage blocked: URL still wins */ }
-  } else {
-    try {
-      const saved = session?.getItem(VARIANT_KEY);
-      if (saved === 'a' || saved === 'b') variant = saved;
-    } catch { /* storage blocked: default to A */ }
-  }
   const screen = p.get('screen')?.toLowerCase() ?? null;
   return {
-    variant,
     intro: p.get('intro') !== '0',
     frame: p.get('frame') !== '0',
     screen: isDeepScreen(screen) ? screen : null,
@@ -43,11 +29,7 @@ export function parseFlags(search: string, session?: KeyValueStore): Flags {
   };
 }
 
-export function readFlags(): Flags {
-  let session: KeyValueStore | undefined;
-  try { session = window.sessionStorage; } catch { session = undefined; }
-  return parseFlags(window.location.search, session);
-}
+export const readFlags = () => parseFlags(window.location.search);
 
 /**
  * Everything that differs between the versions lives here. A is the control; B adds the impact message.
@@ -65,5 +47,4 @@ export const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
 export const FlagsContext = createContext<Flags>(parseFlags(''));
 
 export const useFlags = () => useContext(FlagsContext);
-export const useVariant = () => useContext(FlagsContext).variant;
-export const useVariantConfig = () => VARIANT_CONFIG[useVariant()];
+export const useVariantConfig = () => VARIANT_CONFIG[VARIANT];

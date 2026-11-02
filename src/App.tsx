@@ -25,7 +25,7 @@ import { UseUp } from './screens/UseUp';
 import { WriteRecipe } from './screens/WriteRecipe';
 import type { ScreenName } from './state/types';
 import { useStore } from './store';
-import { useVariant } from './variants';
+import { VARIANT } from './variants';
 
 const SCREENS: Record<ScreenName, () => ReactElement> = {
   home: Home, pantry: Pantry, item: ItemDetail, scan: Scan, scanResult: ScanResult, manual: AddItem,
@@ -35,10 +35,9 @@ const SCREENS: Record<ScreenName, () => ReactElement> = {
 
 export function App() {
   const { state } = useStore();
-  const variant = useVariant();
   const Screen = SCREENS[state.screen];
   return (
-    <div className="app no-strip" data-variant={variant}>
+    <div className="app no-strip" data-variant={VARIANT}>
       <Screen />
       <TabBar />
       <AddSheet />
