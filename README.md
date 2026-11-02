@@ -40,7 +40,7 @@ Pushing to `main` deploys to GitHub Pages in about a minute. CI runs typecheck, 
 
 | Param | Values | Effect |
 |---|---|---|
-| `intro` | `0` | Skip the household setup screen |
+| `intro` | `0` | Skip the welcome screen and household setup |
 | `frame` | `0` | No phone frame on desktop |
 | `screen` | `home` `pantry` `recipes` `me` `scan` `scanresult` `add` `recipe` `cook` `share` | Open straight to a screen. `recipe`/`cook`/`share` take `id=` (default `frittata`) |
 

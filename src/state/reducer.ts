@@ -42,7 +42,7 @@ export type Action =
   | { type: 'toggleDiet'; diet: Diet } | { type: 'saveDiet' }
   | { type: 'addGoal'; key: GoalKey } | { type: 'removeGoal'; key: GoalKey }
   // prototype chrome
-  | { type: 'setHousehold'; household: string } | { type: 'finishSetup' }
+  | { type: 'enterApp' } | { type: 'setHousehold'; household: string } | { type: 'finishSetup' }
   | { type: 'replayIntro' } | { type: 'skipOnboard' } | { type: 'nextOnboard' }
   | { type: 'dismissImpact' }
   | { type: 'clearToast'; n: number };
@@ -53,23 +53,23 @@ export function go(st: AppState, screen: ScreenName, extra: Partial<AppState> = 
   return {
     ...st,
     stack: st.stack.concat([{ screen: st.screen, itemId: st.itemId, recipeId: st.recipeId, cStep: st.cStep }]),
-    screen, addSheet: false, addedNow: 0, ...blankForms(), ...extra,
+    screen, nav: 'forward', addSheet: false, addedNow: 0, ...blankForms(), ...extra,
   };
 }
 
 export function back(st: AppState): AppState {
   if (st.screen === 'scan' && st.addedNow > 0) return toPantry(st);
-  if (st.screen === 'create' && st.cStep > 1) return { ...st, cStep: st.cStep - 1 };
-  if (!st.stack.length) return { ...st, screen: 'home', ...blankForms() };
+  if (st.screen === 'create' && st.cStep > 1) return { ...st, cStep: st.cStep - 1, nav: 'back' };
+  if (!st.stack.length) return { ...st, screen: 'home', nav: 'back', ...blankForms() };
   const p = st.stack[st.stack.length - 1];
   return {
-    ...st, stack: st.stack.slice(0, -1), screen: p.screen,
+    ...st, stack: st.stack.slice(0, -1), screen: p.screen, nav: 'back',
     itemId: p.itemId ?? null, recipeId: p.recipeId ?? null, cStep: p.cStep ?? 1, ...blankForms(),
   };
 }
 
 export function tab(st: AppState, t: ScreenName, extra: Partial<AppState> = {}): AppState {
-  return { ...st, screen: t, stack: [], addSheet: false, addedNow: 0, ...blankForms(), ...extra };
+  return { ...st, screen: t, stack: [], nav: 'none', addSheet: false, addedNow: 0, ...blankForms(), ...extra };
 }
 
 export const say = (st: AppState, text: string): AppState => ({ ...st, toast: { text, n: st.toast.n + 1 } });
@@ -79,7 +79,7 @@ const TAB_SCREEN: Record<TabName, ScreenName> = { home: 'home', pantry: 'pantry'
 const toggle = <T,>(list: T[], v: T) => (list.indexOf(v) >= 0 ? list.filter((x) => x !== v) : list.concat([v]));
 
 function toPantry(st: AppState): AppState {
-  return { ...st, screen: 'pantry', stack: [], loc: 'All', exp: 'any', f: blankManual(), addedNow: 0, ...blankForms() };
+  return { ...st, screen: 'pantry', stack: [], nav: 'none', loc: 'All', exp: 'any', f: blankManual(), addedNow: 0, ...blankForms() };
 }
 
 function addItem(st: AppState, item: Omit<PantryItem, 'id'>, extra: Partial<AppState>): AppState {
@@ -232,7 +232,7 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'cookNext': {
       const steps = findRecipe(st, st.recipeId)?.steps ?? [''];
       if (st.cookStep >= steps.length - 1) {
-        return { ...st, screen: 'useup', useUp: cookedCandidates(st).map((p) => p.id), cooked: st.cooked + 1 };
+        return { ...st, screen: 'useup', nav: 'forward', useUp: cookedCandidates(st).map((p) => p.id), cooked: st.cooked + 1 };
       }
       return { ...st, cookStep: st.cookStep + 1 };
     }
@@ -244,7 +244,7 @@ export function reducer(st: AppState, a: Action): AppState {
         pantry: st.pantry.filter((p) => st.useUp.indexOf(p.id) < 0),
         used: st.used + n,
         usedIds: st.usedIds.concat(st.useUp.filter((id) => st.usedIds.indexOf(id) < 0)),
-        useUp: [], screen: 'home', stack: [], impact: recipeImpact(st, st.useUp),
+        useUp: [], screen: 'home', stack: [], nav: 'none', impact: recipeImpact(st, st.useUp),
       };
       return say(next, n ? 'Pantry updated. ' + n + ' item' + (n > 1 ? 's' : '') + ' used up!' : 'Nothing changed');
     }
@@ -295,6 +295,7 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'addGoal': return addGoal(st, a.key);
     case 'removeGoal': return { ...st, goals: st.goals.filter((g) => g.key !== a.key) };
 
+    case 'enterApp': return { ...st, showWelcome: false, showSetup: true };
     case 'setHousehold': return { ...st, household: a.household };
     case 'finishSetup': return { ...st, showSetup: false };
     case 'replayIntro': return { ...st, onboard: 1 };

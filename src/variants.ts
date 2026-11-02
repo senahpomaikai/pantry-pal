@@ -9,7 +9,7 @@ export type Variant = 'a' | 'b';
 export const VARIANT: Variant = import.meta.env.VITE_VARIANT === 'b' ? 'b' : 'a';
 
 export interface Flags {
-  /** Show the household setup screen on load. */
+  /** Show the welcome screen on load. */
   intro: boolean;
   /** Desktop phone frame. */
   frame: boolean;

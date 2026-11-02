@@ -111,10 +111,15 @@ export interface Toast {
   n: number;
 }
 
+export type NavDirection = 'forward' | 'back' | 'none';
+
 export interface AppState {
   screen: ScreenName;
   stack: StackEntry[];
+  showWelcome: boolean;
   showSetup: boolean;
+  /** Direction of the last move between screens, for the transition. */
+  nav: NavDirection;
   household: string;
   onboard: number;
   addSheet: boolean;

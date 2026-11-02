@@ -59,6 +59,9 @@ button, a, input, select, textarea, label { touch-action: manipulation; }
   zoom: var(--frame-scale, 1);
 }
 
+/* ---------- tab bar ---------- */
+.tab { border-radius: 12px; }
+
 /* ---------- keyboard focus ---------- */
 :focus:not(:focus-visible) { outline: none; }
 :focus-visible { outline: 2.5px solid var(--emerald); outline-offset: 2px; }
@@ -85,3 +88,115 @@ button, a, input, select, textarea, label { touch-action: manipulation; }
 
 /* ---------- add-item suggestions ---------- */
 .suggest .lrow { min-height: 48px; }
+
+/* ---------- welcome ---------- */
+.welcome {
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  overflow: hidden;
+  background: var(--emerald);
+  perspective: 820px;
+  perspective-origin: 50% 20%;
+}
+/* The wall leans back and falls away into emerald, where the logo and button sit. */
+.wall {
+  position: absolute;
+  top: -150px;
+  left: -60px;
+  transform-style: preserve-3d;
+  transform: rotateX(30deg) rotateZ(-10deg);
+}
+.wall-drift { display: flex; gap: 12px; width: max-content; transform-style: preserve-3d; }
+.wall-col { display: flex; flex-direction: column; gap: 12px; width: 132px; transform: translateZ(var(--z)); }
+.wall-tile { position: relative; overflow: hidden; border-radius: 16px; }
+.wall-tile img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.wall-tile.cream { background: var(--cream); }
+.wall-tile.sage { background: #6E8F6F; }
+.welcome::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0, transparent 40%, rgba(29, 59, 40, .72) 58%, var(--emerald) 70%);
+}
+.welcome-front {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 24px calc(32px + var(--sab));
+  color: var(--cream);
+}
+.welcome-mark { display: flex; align-items: center; gap: 10px; color: var(--butter); }
+.welcome-mark svg { width: 40px; height: 40px; }
+.welcome-mark h1 { margin: 0; font-size: 44px; line-height: 1; font-weight: 700; letter-spacing: -.02em; color: var(--cream); }
+.welcome-front p { margin: 12px 0 28px; font-size: 19px; line-height: 1.3; }
+.welcome-go { min-height: 58px; font-size: 18px; color: var(--emerald); }
+.welcome-go:focus-visible { outline-color: var(--cream); }
+
+/* ---------- impact card ---------- */
+.impact { align-items: flex-start; }
+.impact-leaf { color: var(--emerald); line-height: 0; }
+.impact-leaf svg { width: 36px; height: 36px; }
+.impact-text { margin: 0; font-size: 21px; font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums; text-wrap: pretty; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- motion: the same in both versions, and only for people who haven't asked for less ---------- */
+@keyframes appear { from { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes push { from { opacity: 0; transform: translateX(26px); } }
+@keyframes pop { from { opacity: 0; transform: translateX(-26px); } }
+@keyframes sheet-up { from { transform: translateY(100%); } }
+@keyframes settle { from { opacity: 0; transform: translateY(26px) scale(.96); } }
+@keyframes draw { from { stroke-dashoffset: 40; } to { stroke-dashoffset: 0; } }
+@keyframes wall-in { from { opacity: 0; transform: translateZ(calc(var(--z) - 320px)); } }
+@keyframes wall-drift { to { transform: translateX(calc(-50% - 6px)); } }
+@keyframes welcome-out { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .app { --ease: cubic-bezier(.2, .8, .2, 1); --spring: cubic-bezier(.3, 1.4, .5, 1); }
+
+  /* Moving between screens: forward slides in from the right, back from the left. */
+  .app[data-nav='forward'] .screen { animation: push .26s var(--ease); }
+  .app[data-nav='back'] .screen { animation: pop .26s var(--ease); }
+  .app[data-nav='none'] .screen { animation: appear .18s ease-out; }
+
+  /* Lists that arrive one row at a time. */
+  .pantry-list .prow, .useup-list .lrow { animation: rise .36s var(--ease) calc(min(var(--n, 0), 8) * 38ms) backwards; }
+  .pantry-list .prow:nth-child(2), .useup-list .lrow:nth-child(2) { --n: 1; }
+  .pantry-list .prow:nth-child(3), .useup-list .lrow:nth-child(3) { --n: 2; }
+  .pantry-list .prow:nth-child(4), .useup-list .lrow:nth-child(4) { --n: 3; }
+  .pantry-list .prow:nth-child(5), .useup-list .lrow:nth-child(5) { --n: 4; }
+  .pantry-list .prow:nth-child(6), .useup-list .lrow:nth-child(6) { --n: 5; }
+  .pantry-list .prow:nth-child(7) { --n: 6; }
+  .pantry-list .prow:nth-child(8) { --n: 7; }
+  .pantry-list .prow:nth-child(n + 9) { --n: 8; }
+
+  /* Cooking. */
+  .cook-step { animation: rise .3s var(--ease); }
+  .bar span { transition: width .35s var(--ease); }
+
+  /* Things that open. */
+  .overlay { animation: appear .2s ease-out; }
+  .sheet { animation: sheet-up .3s var(--ease); }
+  .modal { animation: settle .3s var(--ease); }
+  .toast { animation: rise .24s var(--ease); }
+  .suggest { animation: rise .16s var(--ease); }
+  .setup, .setup .modal { animation-delay: .18s; animation-fill-mode: backwards; }
+
+  /* The impact card lands with a little bounce, and the leaf draws itself. */
+  .modal.impact { animation: settle .46s var(--spring); }
+  .impact-leaf path { stroke-dasharray: 40; animation: draw .7s ease-out .12s backwards; }
+
+  .btn:not(:disabled) { transition: transform .12s ease-out; }
+  .btn:not(:disabled):active { transform: scale(.98); }
+
+  /* Welcome: the wall arrives from deep in the background, then keeps drifting. */
+  .wall-col { animation: wall-in 1.1s var(--ease) calc(var(--i) * 70ms) backwards; }
+  .wall-drift { animation: wall-drift 110s linear infinite; }
+  .welcome-front > * { animation: rise .6s var(--ease) .45s backwards; }
+  .welcome-front > p { animation-delay: .55s; }
+  .welcome-front > .welcome-go { animation-delay: .65s; }
+  .welcome.leaving { animation: welcome-out .24s ease-in forwards; }
+}
