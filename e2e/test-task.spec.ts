@@ -18,7 +18,7 @@ async function saveAndShare(page: Page, recipe: string) {
 test('variant A: + tab → scan spinach → save and share a spinach recipe', async ({ page }) => {
   await page.goto('./?v=a');
   await skipIntro(page);
-  await expect(page.getByRole('button', { name: /Test task: 0 of 3/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Test task: 1 of 3/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await page.getByRole('button', { name: 'Scan an item' }).click();

@@ -32,7 +32,7 @@ export const LEAD_PRESETS = [1, 2, 3];
 export const PANTRY_SEED: PantryItem[] = [
   { id: 1, name: 'Chicken thighs', loc: 'Fridge', qty: '1 lb', days: 1 },
   { id: 2, name: 'Cherry tomatoes', loc: 'Counter', qty: '1 pint', days: 2 },
-  { id: 3, name: 'Milk', loc: 'Fridge', qty: 'Half gallon', days: 3 },
+  { id: 3, name: 'Spinach', loc: 'Fridge', qty: 'Half a bag', days: 0 },
   { id: 4, name: 'Tortillas', loc: 'Pantry', qty: '8', days: 5 },
   { id: 5, name: 'Eggs', loc: 'Fridge', qty: '6', days: 12 },
   { id: 6, name: 'Cheddar', loc: 'Fridge', qty: '1 block', days: 14 },

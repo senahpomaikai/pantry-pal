@@ -20,7 +20,7 @@ describe('match', () => {
 });
 
 describe('task()', () => {
-  it('starts at 0 of 3', () => expect(task(fresh())).toEqual({ g1: false, g2: false, g3: false, done: 0 }));
+  it('starts at 1 of 3: spinach is in the starting pantry', () => expect(task(fresh())).toEqual({ g1: true, g2: false, g3: false, done: 1 }));
   it('g1: any pantry item containing "spinach"', () => {
     expect(task(fresh({ pantry: [spinach] })).g1).toBe(true);
   });
@@ -62,10 +62,10 @@ describe('fmtAmt', () => {
 
 describe('pantry filtering', () => {
   it('sorts by days left', () => {
-    expect(pantryRows(fresh()).map((p) => p.days)).toEqual([1, 2, 3, 5, 12, 14, 18, 21, 120, 200]);
+    expect(pantryRows(fresh()).map((p) => p.days)).toEqual([0, 1, 2, 5, 12, 14, 18, 21, 120, 200]);
   });
   it('filters by place', () => {
-    expect(pantryRows(fresh({ loc: 'Fridge' })).map((p) => p.name)).toEqual(['Chicken thighs', 'Milk', 'Eggs', 'Cheddar']);
+    expect(pantryRows(fresh({ loc: 'Fridge' })).map((p) => p.name)).toEqual(['Spinach', 'Chicken thighs', 'Eggs', 'Cheddar']);
   });
   it('filters by expiry window', () => {
     expect(expOk('soon', 3)).toBe(true);
@@ -83,7 +83,8 @@ describe('pantry filtering', () => {
   });
   it('marks items with 3 days or fewer as warn', () => {
     const rows = pantryRows(fresh());
-    expect(rows[2]).toMatchObject({ name: 'Milk', tagCls: 'warn', exp: '3 days', sub: 'Fridge · Half gallon' });
+    expect(rows[0]).toMatchObject({ name: 'Spinach', tagCls: 'warn', exp: 'Today', sub: 'Fridge · Half a bag' });
+    expect(rows[2]).toMatchObject({ name: 'Cherry tomatoes', tagCls: 'warn', exp: '2 days' });
     expect(rows[3].tagCls).toBe('');
   });
 });
@@ -95,18 +96,18 @@ describe('recipe filtering', () => {
 
   it('card text', () => {
     const c = recipeCard(pantry, RECIPES[0]);
-    expect(c.matchText).toBe('You have 4 of 5');
-    expect(c.soonText).toBe('Uses up cherry tomatoes');
+    expect(c.matchText).toBe('You have everything');
+    expect(c.soonText).toBe('Uses up spinach, cherry tomatoes');
     expect(recipeCard(pantry, RECIPES[2]).matchText).toBe('You have everything');
   });
   it('uses what’s expiring', () => {
-    expect(ids(applyRecipeFilters(cards, ['soon'], []))).toEqual(['chickenrice', 'frittata', 'pasta', 'smoothie']);
+    expect(ids(applyRecipeFilters(cards, ['soon'], []))).toEqual(['chickenrice', 'frittata', 'pasta', 'quesadilla', 'smoothie']);
   });
   it('20 min or less', () => {
     expect(ids(applyRecipeFilters(cards, ['quick'], []))).toEqual(['friedrice', 'quesadilla', 'smoothie']);
   });
   it('I have everything', () => {
-    expect(ids(applyRecipeFilters(cards, ['ready'], []))).toEqual(['chickenrice', 'friedrice']);
+    expect(ids(applyRecipeFilters(cards, ['ready'], []))).toEqual(['chickenrice', 'friedrice', 'frittata', 'quesadilla']);
   });
   it('fits my food preferences (all prefs must match; ignored when none saved)', () => {
     expect(ids(applyRecipeFilters(cards, ['diet'], ['Vegetarian', 'Gluten-free']))).toEqual(['frittata', 'smoothie']);
