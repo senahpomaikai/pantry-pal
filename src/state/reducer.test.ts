@@ -182,12 +182,9 @@ describe('deep links and flags', () => {
   it('unknown recipe id falls back to frittata', () => {
     expect(applyDeepLink(createInitialState(), 'cook', 'nope').recipeId).toBe('frittata');
   });
-  it('parses flags with defaults and remembers the variant', () => {
-    const mem = new Map<string, string>();
-    const store = { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => void mem.set(k, v) };
-    expect(parseFlags('', store)).toMatchObject({ variant: 'a', intro: true, frame: true, screen: null, id: 'frittata' });
-    expect(parseFlags('?v=b&frame=0&screen=cook&id=smoothie', store)).toMatchObject({ variant: 'b', frame: false, screen: 'cook', id: 'smoothie' });
-    expect(parseFlags('', store).variant).toBe('b');
+  it('parses flags with defaults', () => {
+    expect(parseFlags('')).toMatchObject({ intro: true, frame: true, screen: null, id: 'frittata' });
+    expect(parseFlags('?frame=0&screen=cook&id=smoothie')).toMatchObject({ frame: false, screen: 'cook', id: 'smoothie' });
     expect(parseFlags('?screen=bogus').screen).toBeNull();
   });
 });

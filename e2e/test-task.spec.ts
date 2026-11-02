@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const A = './?v=a';
-const B = './?v=b';
+const A = './A/';
+const B = './B/';
 
 async function finishSetup(page: Page) {
   await expect(page.getByRole('heading', { name: 'Set up your household' })).toBeVisible();
@@ -66,14 +66,14 @@ for (const [name, url, showsCard] of [['control', A, false], ['impact message', 
 }
 
 test('impact message: skipping the pantry update shows nothing', async ({ page }) => {
-  await page.goto(B + '&intro=0');
+  await page.goto(B + '?intro=0');
   await cookFrittata(page);
   await page.getByRole('button', { name: 'Skip' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
 test('impact message: "I used it" on food at risk shows the card, "I tossed it" does not', async ({ page }) => {
-  await page.goto(B + '&intro=0');
+  await page.goto(B + '?intro=0');
   await nav(page).getByRole('button', { name: 'Pantry' }).click();
   await page.getByRole('button', { name: /Spinach/ }).click();
   await page.getByRole('button', { name: 'I used it' }).click();
@@ -85,7 +85,7 @@ test('impact message: "I used it" on food at risk shows the card, "I tossed it" 
 });
 
 test('suggestions cap at three, and Where moves the days', async ({ page }) => {
-  await page.goto(A + '&intro=0');
+  await page.goto(A + '?intro=0');
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await page.getByRole('button', { name: 'Type it in' }).click();
   await page.getByLabel('What is it?').fill('ch');
@@ -100,7 +100,7 @@ test('suggestions cap at three, and Where moves the days', async ({ page }) => {
 });
 
 test('the scanner walks through the groceries', async ({ page }) => {
-  await page.goto(A + '&intro=0');
+  await page.goto(A + '?intro=0');
   await page.getByRole('button', { name: 'Scan groceries' }).click();
   await page.getByRole('button', { name: 'Pretend to scan: milk' }).click();
   await page.getByRole('button', { name: 'Add to my pantry' }).click();
@@ -112,11 +112,27 @@ test('the scanner walks through the groceries', async ({ page }) => {
   await expect(page.getByText('My pantry')).toBeVisible();
 });
 
+test('the homepage offers both versions', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('link', { name: /Version B/ }).click();
+  await expect(page).toHaveURL(/\/pantry-pal\/B\/$/);
+  await expect(page.locator('html')).toHaveAttribute('data-variant', 'b');
+  await page.goto('./');
+  await page.getByRole('link', { name: /Version A/ }).click();
+  await expect(page).toHaveURL(/\/pantry-pal\/A\/$/);
+  await expect(page.locator('html')).toHaveAttribute('data-variant', 'a');
+});
+
+test('?v= cannot switch a build', async ({ page }) => {
+  await page.goto(A + '?v=b');
+  await expect(page.locator('html')).toHaveAttribute('data-variant', 'a');
+});
+
 test.describe('desktop laptop (1366x768)', () => {
   test.use({ viewport: { width: 1366, height: 768 }, isMobile: false, hasTouch: false });
 
   test('the phone frame fits the window and stays clickable', async ({ page }) => {
-    await page.goto('./?intro=0');
+    await page.goto(A + '?intro=0');
     const box = (await page.locator('.frame').boundingBox())!;
     expect(box.y).toBeGreaterThanOrEqual(0);
     expect(box.y + box.height).toBeLessThanOrEqual(768);
