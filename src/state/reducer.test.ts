@@ -81,7 +81,7 @@ describe('reducer: items, cooking, goals', () => {
     let st = run([{ type: 'go', screen: 'recipe', recipeId: 'smoothie' }, { type: 'startCook' }, { type: 'cookNext' }, { type: 'cookNext' }]);
     expect(st.screen).toBe('useup');
     expect(st.cooked).toBe(1);
-    expect(st.useUp).toEqual([3]); // Milk
+    expect(st.useUp).toEqual([3]); // Spinach
     st = reducer(st, { type: 'confirmUse' });
     expect(st.toast.text).toBe('Pantry updated. 1 item used up!');
     expect(st.screen).toBe('home');
