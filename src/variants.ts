@@ -5,11 +5,9 @@ import { isDeepScreen, type DeepScreen } from './state/deeplink';
 export type Variant = 'a' | 'b';
 
 export interface Flags {
-  /** A/B variant. A = the prototype exactly as designed. */
+  /** A/B version. A = control, B = impact message. */
   variant: Variant;
-  /** Show the test-task layer: top strip, welcome notice, tour, task sheet, completion modal. */
-  task: boolean;
-  /** Show the welcome notice and tour on load. */
+  /** Show the household setup screen on load. */
   intro: boolean;
   /** Desktop phone frame. */
   frame: boolean;
@@ -38,7 +36,6 @@ export function parseFlags(search: string, session?: KeyValueStore): Flags {
   const screen = p.get('screen')?.toLowerCase() ?? null;
   return {
     variant,
-    task: p.get('task') !== '0',
     intro: p.get('intro') !== '0',
     frame: p.get('frame') !== '0',
     screen: isDeepScreen(screen) ? screen : null,
@@ -53,23 +50,16 @@ export function readFlags(): Flags {
 }
 
 /**
- * Everything that differs between variants lives here. To change variant B, edit its row
- * (see README, "Changing version B").
+ * Everything that differs between the versions lives here. A is the control; B adds the impact message.
  */
 export interface VariantConfig {
-  /** Centre "+" tab in the tab bar that opens the Add sheet. */
-  addTab: boolean;
-  /** "Add" button in the My pantry header that opens the Add sheet. */
-  pantryAddButton: boolean;
-  /** Show the "Recipes › Write a recipe" group in the Add sheet. */
-  addSheetRecipes: boolean;
-  /** Screen the add sheet opens over for ?screen=add (where the variant's add entry point lives). */
-  addSheetOver: 'home' | 'pantry';
+  /** After food is used, show the money and food saved. */
+  impactMessage: boolean;
 }
 
 export const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
-  a: { addTab: true, pantryAddButton: false, addSheetRecipes: true, addSheetOver: 'home' },
-  b: { addTab: false, pantryAddButton: true, addSheetRecipes: false, addSheetOver: 'pantry' },
+  a: { impactMessage: false },
+  b: { impactMessage: true },
 };
 
 export const FlagsContext = createContext<Flags>(parseFlags(''));

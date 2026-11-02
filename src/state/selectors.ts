@@ -25,30 +25,6 @@ export const soon = (pantry: PantryItem[], ing: string) => {
 export const allRecipes = (st: Pick<AppState, 'mine'>): Recipe[] => RECIPES.concat(st.mine);
 export const findRecipe = (st: Pick<AppState, 'mine'>, id: string | null) => allRecipes(st).find((r) => r.id === id);
 
-export function usesSpinach(st: Pick<AppState, 'mine'>, id: string): boolean {
-  const r = findRecipe(st, id);
-  return !!r && r.ings.some((i) => i.toLowerCase().includes('spinach'));
-}
-
-/* ---------- test task ---------- */
-
-export interface TaskProgress { g1: boolean; g2: boolean; g3: boolean; done: number }
-
-export function task(st: Pick<AppState, 'pantry' | 'saved' | 'shared' | 'mine'>): TaskProgress {
-  const g1 = st.pantry.some((p) => p.name.toLowerCase().includes('spinach'));
-  const g2 = st.saved.some((id) => usesSpinach(st, id));
-  const g3 = st.shared.some((id) => usesSpinach(st, id));
-  return { g1, g2, g3, done: [g1, g2, g3].filter(Boolean).length };
-}
-
-export function taskRows(g: TaskProgress) {
-  return [
-    { done: g.g1, text: 'Get spinach into your pantry', hint: 'Scan it or type it in.' },
-    { done: g.g2, text: 'Save a recipe that uses spinach', hint: 'Find one, or write your own.' },
-    { done: g.g3, text: 'Share that recipe with a friend', hint: 'Look for the share icon.' },
-  ];
-}
-
 /* ---------- formatting ---------- */
 
 export function expLabel(d: number): string {

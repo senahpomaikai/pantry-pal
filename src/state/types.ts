@@ -73,6 +73,10 @@ export interface ManualForm {
   qty: string;
   loc: string;
   days: number;
+  /** The tester chose the days by hand, so nothing overwrites them. */
+  daysSet: boolean;
+  /** Name of the suggestion just picked, which closes the list until the name changes. */
+  picked: string;
 }
 
 export interface LocForm {
@@ -95,6 +99,12 @@ export type RecipeFilter = 'soon' | 'quick' | 'ready' | 'diet';
 export type Seg = 'discover' | 'saved' | 'mine';
 export type UseKind = 'used' | 'tossed';
 
+/** Money and food saved, shown by the impact message. */
+export interface Impact {
+  dollars: number;
+  lbs: number;
+}
+
 export interface Toast {
   text: string;
   /** Bumped on every message so the auto-dismiss timer restarts, like clearTimeout in the prototype. */
@@ -104,15 +114,16 @@ export interface Toast {
 export interface AppState {
   screen: ScreenName;
   stack: StackEntry[];
-  showNotice: boolean;
+  showSetup: boolean;
+  household: string;
   onboard: number;
-  showTask: boolean;
-  taskDone: boolean;
-  taskDoneShown: boolean;
   addSheet: boolean;
   shareFor: string | null;
   shareTo: string[];
   toast: Toast;
+  impact: Impact | null;
+  /** Items added in the current run of the add form or scanner. */
+  addedNow: number;
   pantry: PantryItem[];
   nextId: number;
   saved: string[];
@@ -130,6 +141,9 @@ export interface AppState {
   f: ManualForm;
   scanLoc: string;
   scanDays: number;
+  scanDaysSet: boolean;
+  /** Position in the pretend scanner's list of groceries. */
+  scanIdx: number;
   customLocs: string[];
   q: string;
   filters: RecipeFilter[];

@@ -1,4 +1,6 @@
 // One typed action per prototype handler. Mirrors Main.dc.html's setState calls; no DOM or React imports.
+import { daysIn, findFood, scanFood, type Food } from './foods';
+import { itemImpact, recipeImpact } from './impact';
 import { blankDayForm, blankDraft, blankForms, blankLocForm, blankManual } from './seed';
 import {
   draftToRecipe, draftView, findRecipe, locations, cookedCandidates, validateDuration, validatePlace,
@@ -13,11 +15,10 @@ export type Action =
   | { type: 'back' }
   | { type: 'tab'; tab: TabName; seg?: Seg }
   | { type: 'openAdd' } | { type: 'closeAdd' }
-  | { type: 'openTask' } | { type: 'closeTask' }
   // scan + add
   | { type: 'goManualFromScan' } | { type: 'simScan' } | { type: 'rescan' } | { type: 'addScanned' }
   | { type: 'setScanLoc'; loc: string } | { type: 'setScanDays'; days: number }
-  | { type: 'setF'; patch: Partial<ManualForm> } | { type: 'addManual' }
+  | { type: 'setF'; patch: Partial<ManualForm> } | { type: 'pickFood'; name: string } | { type: 'addManual' } | { type: 'doneAdding' }
   | { type: 'toggleLocForm' } | { type: 'clName'; value: string } | { type: 'clCancel' } | { type: 'clAdd' }
   | { type: 'toggleDayForm' } | { type: 'cdNum'; value: string } | { type: 'cdUnit'; unit: DayUnit } | { type: 'cdCancel' } | { type: 'cdSet' }
   // pantry
@@ -25,7 +26,7 @@ export type Action =
   | { type: 'markItem'; kind: UseKind }
   // recipes
   | { type: 'setQ'; q: string } | { type: 'toggleFilters' } | { type: 'toggleFilter'; key: RecipeFilter } | { type: 'clearFilters' }
-  | { type: 'setSeg'; seg: Seg }
+  | { type: 'setSeg'; seg: Seg } | { type: 'cookExpiring' }
   | { type: 'toggleSave' }
   | { type: 'openShare' } | { type: 'closeShare' } | { type: 'toggleShareTo'; name: string } | { type: 'sendShare' } | { type: 'copyLink' }
   // cooking
@@ -41,8 +42,9 @@ export type Action =
   | { type: 'toggleDiet'; diet: Diet } | { type: 'saveDiet' }
   | { type: 'addGoal'; key: GoalKey } | { type: 'removeGoal'; key: GoalKey }
   // prototype chrome
-  | { type: 'replayIntro' } | { type: 'startTour' } | { type: 'skipTour' } | { type: 'skipOnboard' } | { type: 'nextOnboard' }
-  | { type: 'taskComplete' } | { type: 'closeDone' }
+  | { type: 'setHousehold'; household: string } | { type: 'finishSetup' }
+  | { type: 'replayIntro' } | { type: 'skipOnboard' } | { type: 'nextOnboard' }
+  | { type: 'dismissImpact' }
   | { type: 'clearToast'; n: number };
 
 /* ---------- helpers (the prototype's go / back / tab / say) ---------- */
@@ -51,11 +53,12 @@ export function go(st: AppState, screen: ScreenName, extra: Partial<AppState> = 
   return {
     ...st,
     stack: st.stack.concat([{ screen: st.screen, itemId: st.itemId, recipeId: st.recipeId, cStep: st.cStep }]),
-    screen, addSheet: false, ...blankForms(), ...extra,
+    screen, addSheet: false, addedNow: 0, ...blankForms(), ...extra,
   };
 }
 
 export function back(st: AppState): AppState {
+  if (st.screen === 'scan' && st.addedNow > 0) return toPantry(st);
   if (st.screen === 'create' && st.cStep > 1) return { ...st, cStep: st.cStep - 1 };
   if (!st.stack.length) return { ...st, screen: 'home', ...blankForms() };
   const p = st.stack[st.stack.length - 1];
@@ -66,7 +69,7 @@ export function back(st: AppState): AppState {
 }
 
 export function tab(st: AppState, t: ScreenName, extra: Partial<AppState> = {}): AppState {
-  return { ...st, screen: t, stack: [], addSheet: false, ...blankForms(), ...extra };
+  return { ...st, screen: t, stack: [], addSheet: false, addedNow: 0, ...blankForms(), ...extra };
 }
 
 export const say = (st: AppState, text: string): AppState => ({ ...st, toast: { text, n: st.toast.n + 1 } });
@@ -75,19 +78,36 @@ const TAB_SCREEN: Record<TabName, ScreenName> = { home: 'home', pantry: 'pantry'
 
 const toggle = <T,>(list: T[], v: T) => (list.indexOf(v) >= 0 ? list.filter((x) => x !== v) : list.concat([v]));
 
-function addItem(st: AppState, item: Omit<PantryItem, 'id'>, msg: string): AppState {
+function toPantry(st: AppState): AppState {
+  return { ...st, screen: 'pantry', stack: [], loc: 'All', exp: 'any', f: blankManual(), addedNow: 0, ...blankForms() };
+}
+
+function addItem(st: AppState, item: Omit<PantryItem, 'id'>, extra: Partial<AppState>): AppState {
   return say({
     ...st, pantry: st.pantry.concat([{ id: st.nextId, ...item }]), nextId: st.nextId + 1,
-    screen: 'pantry', stack: [], loc: 'All', exp: 'any', f: blankManual(), ...blankForms(),
-  }, msg);
+    addedNow: st.addedNow + 1, ...blankForms(), ...extra,
+  }, item.name + ' added to your pantry');
+}
+
+const scanned = (food: Food, loc: string, days: number) => ({ name: food.name, qty: food.qty, loc, days });
+
+/** Changing place moves the days to that food's timeline, unless the tester chose the days by hand. */
+function formWithPlace(f: ManualForm, loc: string): ManualForm {
+  const days = f.daysSet ? null : daysIn(findFood(f.name), loc);
+  return { ...f, loc, days: days ?? f.days };
+}
+
+function scanWithPlace(st: AppState, loc: string): AppState {
+  const days = st.scanDaysSet ? null : daysIn(scanFood(st.scanIdx), loc);
+  return { ...st, scanLoc: loc, scanDays: days ?? st.scanDays };
 }
 
 function pickLoc(st: AppState, v: string): AppState {
-  return st.screen === 'scanResult' ? { ...st, scanLoc: v } : { ...st, f: { ...st.f, loc: v } };
+  return st.screen === 'scanResult' ? scanWithPlace(st, v) : { ...st, f: formWithPlace(st.f, v) };
 }
 
 function pickDays(st: AppState, v: number): AppState {
-  return st.screen === 'scanResult' ? { ...st, scanDays: v } : { ...st, f: { ...st.f, days: v } };
+  return st.screen === 'scanResult' ? { ...st, scanDays: v, scanDaysSet: true } : { ...st, f: { ...st.f, days: v, daysSet: true } };
 }
 
 function toggleIng(d: Draft, name: string): Draft {
@@ -128,22 +148,32 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'tab': return tab(st, TAB_SCREEN[a.tab], a.seg ? { seg: a.seg } : {});
     case 'openAdd': return { ...st, addSheet: true };
     case 'closeAdd': return { ...st, addSheet: false };
-    case 'openTask': return { ...st, showTask: true };
-    case 'closeTask': return { ...st, showTask: false };
 
     case 'goManualFromScan': return { ...st, screen: 'manual', ...blankForms() };
-    case 'simScan': return { ...st, screen: 'scanResult', scanLoc: 'Fridge', scanDays: 5, ...blankForms() };
+    case 'simScan': {
+      const food = scanFood(st.scanIdx);
+      return { ...st, screen: 'scanResult', scanLoc: food.loc, scanDays: daysIn(food, food.loc) ?? 5, scanDaysSet: false, ...blankForms() };
+    }
     case 'rescan': return { ...st, screen: 'scan', ...blankForms() };
     case 'addScanned':
-      return addItem(st, { name: 'Baby spinach', qty: '1 bag', loc: st.scanLoc, days: st.scanDays }, 'Baby spinach added to your pantry');
-    case 'setScanLoc': return { ...st, scanLoc: a.loc };
-    case 'setScanDays': return { ...st, scanDays: a.days };
-    case 'setF': return { ...st, f: { ...st.f, ...a.patch } };
+      return addItem(st, scanned(scanFood(st.scanIdx), st.scanLoc, st.scanDays), { screen: 'scan', scanIdx: st.scanIdx + 1 });
+    case 'setScanLoc': return scanWithPlace(st, a.loc);
+    case 'setScanDays': return pickDays(st, a.days);
+    case 'setF': {
+      const f = { ...st.f, ...a.patch, daysSet: st.f.daysSet || a.patch.days !== undefined };
+      return { ...st, f: a.patch.loc ? formWithPlace(f, a.patch.loc) : f };
+    }
+    case 'pickFood': {
+      const food = findFood(a.name);
+      if (!food) return { ...st, f: { ...st.f, name: a.name } };
+      return { ...st, f: { ...st.f, name: food.name, qty: food.qty, loc: food.loc, days: daysIn(food, food.loc) ?? st.f.days, daysSet: false, picked: food.name } };
+    }
     case 'addManual': {
       const name = st.f.name.trim();
       if (!name) return st;
-      return addItem(st, { name, qty: st.f.qty.trim(), loc: st.f.loc, days: st.f.days }, name + ' added to your pantry');
+      return addItem(st, { name, qty: st.f.qty.trim(), loc: st.f.loc, days: st.f.days }, { f: blankManual() });
     }
+    case 'doneAdding': return toPantry(st);
 
     case 'toggleLocForm': return { ...st, locForm: { open: !st.locForm.open, name: '', err: '' } };
     case 'clName': return { ...st, locForm: { ...st.locForm, name: a.value.slice(0, 20), err: '' } };
@@ -176,7 +206,8 @@ export function reducer(st: AppState, a: Action): AppState {
         used: st.used + (a.kind === 'used' ? 1 : 0), tossed: st.tossed + (a.kind === 'tossed' ? 1 : 0),
         usedIds: a.kind === 'used' && st.usedIds.indexOf(p.id) < 0 ? st.usedIds.concat([p.id]) : st.usedIds,
       };
-      return say(back(removed), a.kind === 'used' ? 'Nice! ' + p.name + ' used up.' : p.name + ' removed.');
+      const impact = a.kind === 'used' ? itemImpact(p) : null;
+      return say({ ...back(removed), impact }, a.kind === 'used' ? 'Nice! ' + p.name + ' used up.' : p.name + ' removed.');
     }
 
     case 'setQ': return { ...st, q: a.q };
@@ -184,6 +215,7 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'toggleFilter': return { ...st, filters: toggle(st.filters, a.key) };
     case 'clearFilters': return { ...st, filters: [] };
     case 'setSeg': return { ...st, seg: a.seg };
+    case 'cookExpiring': return tab(st, 'recipes', { seg: 'discover', q: '', filters: ['soon'], filtersOpen: false });
     case 'toggleSave': {
       if (st.recipeId === null) return st;
       const on = st.saved.indexOf(st.recipeId) >= 0;
@@ -212,7 +244,7 @@ export function reducer(st: AppState, a: Action): AppState {
         pantry: st.pantry.filter((p) => st.useUp.indexOf(p.id) < 0),
         used: st.used + n,
         usedIds: st.usedIds.concat(st.useUp.filter((id) => st.usedIds.indexOf(id) < 0)),
-        useUp: [], screen: 'home', stack: [],
+        useUp: [], screen: 'home', stack: [], impact: recipeImpact(st, st.useUp),
       };
       return say(next, n ? 'Pantry updated. ' + n + ' item' + (n > 1 ? 's' : '') + ' used up!' : 'Nothing changed');
     }
@@ -263,13 +295,12 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'addGoal': return addGoal(st, a.key);
     case 'removeGoal': return { ...st, goals: st.goals.filter((g) => g.key !== a.key) };
 
+    case 'setHousehold': return { ...st, household: a.household };
+    case 'finishSetup': return { ...st, showSetup: false };
     case 'replayIntro': return { ...st, onboard: 1 };
-    case 'startTour': return { ...st, showNotice: false, onboard: 1 };
-    case 'skipTour': return { ...st, showNotice: false, onboard: 0 };
     case 'skipOnboard': return { ...st, onboard: 0 };
     case 'nextOnboard': return { ...st, onboard: st.onboard >= 3 ? 0 : st.onboard + 1 };
-    case 'taskComplete': return { ...st, taskDone: true, taskDoneShown: true, showTask: false };
-    case 'closeDone': return { ...st, taskDone: false };
+    case 'dismissImpact': return { ...st, impact: null, toast: { ...st.toast, text: '' } };
     case 'clearToast': return a.n === st.toast.n ? { ...st, toast: { ...st.toast, text: '' } } : st;
   }
 }

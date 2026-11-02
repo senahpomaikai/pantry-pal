@@ -9,9 +9,9 @@ export const isDeepScreen = (v: string | null): v is DeepScreen => !!v && (DEEP_
 
 /**
  * Applies a deep link to a fresh state. The back stack is seeded so Back behaves as if the
- * participant had navigated there. `addOn` is the screen the add sheet opens over (variant dependent).
+ * participant had navigated there.
  */
-export function applyDeepLink(st: AppState, screen: DeepScreen, recipeId: string, addOn: 'home' | 'pantry'): AppState {
+export function applyDeepLink(st: AppState, screen: DeepScreen, recipeId: string): AppState {
   const id = findRecipe(st, recipeId) ? recipeId : 'frittata';
   switch (screen) {
     case 'home': return st;
@@ -20,7 +20,7 @@ export function applyDeepLink(st: AppState, screen: DeepScreen, recipeId: string
     case 'me': return { ...st, screen: 'profile' };
     case 'scan': return { ...st, screen: 'scan', stack: [{ screen: 'home' }] };
     case 'scanresult': return { ...st, screen: 'scanResult', stack: [{ screen: 'home' }] };
-    case 'add': return { ...st, screen: addOn, addSheet: true };
+    case 'add': return { ...st, screen: 'home', addSheet: true };
     case 'recipe': return { ...st, screen: 'recipe', recipeId: id, stack: [{ screen: 'recipes' }] };
     case 'cook': return { ...st, screen: 'cook', recipeId: id, cookStep: 0, stack: [{ screen: 'recipes' }, { screen: 'recipe', recipeId: id }] };
     case 'share': return { ...st, screen: 'recipe', recipeId: id, stack: [{ screen: 'recipes' }], shareFor: id, shareTo: [] };

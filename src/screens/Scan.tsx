@@ -2,11 +2,12 @@ import { ChipGroup, chipsOf } from '../components/Chip';
 import { CustomPlace, CustomTime } from '../components/CustomForms';
 import { BackButton } from '../components/TopBar';
 import { SCAN_DAY_PRESETS } from '../state/seed';
+import { scanFood } from '../state/foods';
 import { dayFmt, dayOpts, locations } from '../state/selectors';
 import { useStore } from '../store';
 
 export function Scan() {
-  const { dispatch } = useStore();
+  const { state, dispatch } = useStore();
   return (
     <div className="screen scan" style={{ background: '#1D3B28', color: '#FEF8EE' }}>
       <div className="topbar">
@@ -18,7 +19,7 @@ export function Scan() {
           <span className="note" style={{ color: '#FCEBD0' }}>camera view goes here<br />(not in this prototype)</span>
         </div>
         <p style={{ margin: 0, textAlign: 'center', color: '#FEF8EE', maxWidth: 280 }}>Point at a barcode, label, or loose produce.</p>
-        <button className="btn btn-block" style={{ background: '#FEF8EE', color: '#1D3B28' }} onClick={() => dispatch({ type: 'simScan' })}>Pretend to scan: baby spinach</button>
+        <button className="btn btn-block" style={{ background: '#FEF8EE', color: '#1D3B28' }} onClick={() => dispatch({ type: 'simScan' })}>Pretend to scan: {scanFood(state.scanIdx).name.toLowerCase()}</button>
         <button className="btn btn-ghost" style={{ color: '#FEF8EE' }} onClick={() => dispatch({ type: 'goManualFromScan' })}>Type it in instead</button>
       </div>
     </div>
@@ -27,13 +28,14 @@ export function Scan() {
 
 export function ScanResult() {
   const { state, dispatch } = useStore();
+  const food = scanFood(state.scanIdx);
   return (
     <div className="screen">
       <div className="topbar"><BackButton /><p className="title">We found</p></div>
       <div className="scroll">
         <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          <div className="ph" style={{ width: 88, height: 88 }}>spinach</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="h2">Baby spinach</span><span className="muted">1 bag</span></div>
+          <div className="ph" style={{ width: 88, height: 88 }}>{food.name.toLowerCase()}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="h2">{food.name}</span><span className="muted">{food.qty}</span></div>
         </div>
         <div className="field">
           <span className="label" id="s-where">Where will you keep it?</span>

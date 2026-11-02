@@ -2,13 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { createInitialState } from './seed';
 import {
   applyRecipeFilters, checkAmount, dayFmt, draftView, expLabel, expOk, fmtAmt, match, pantryFilterParts, pantryRows,
-  recipeCard, recipeList, task, validateDuration, validatePlace,
+  recipeCard, recipeList, validateDuration, validatePlace,
 } from './selectors';
 import { RECIPES } from './seed';
 import type { AppState, Draft } from './types';
 
 const fresh = (patch: Partial<AppState> = {}): AppState => ({ ...createInitialState(), ...patch });
-const spinach = { id: 99, name: 'Baby spinach', loc: 'Fridge', qty: '1 bag', days: 5 };
 
 describe('match', () => {
   it('matches equal names case-insensitively', () => expect(match('Eggs', 'eggs')).toBe(true));
@@ -17,25 +16,6 @@ describe('match', () => {
     expect(match('Spinach', 'Baby spinach')).toBe(true);
   });
   it('rejects unrelated names', () => expect(match('Rice', 'Milk')).toBe(false));
-});
-
-describe('task()', () => {
-  it('starts at 1 of 3: spinach is in the starting pantry', () => expect(task(fresh())).toEqual({ g1: true, g2: false, g3: false, done: 1 }));
-  it('g1: any pantry item containing "spinach"', () => {
-    expect(task(fresh({ pantry: [spinach] })).g1).toBe(true);
-  });
-  it('g2: saving a spinach recipe counts, a non-spinach one does not', () => {
-    expect(task(fresh({ saved: ['chickenrice'] })).g2).toBe(false);
-    expect(task(fresh({ saved: ['smoothie'] })).g2).toBe(true);
-  });
-  it('g3: sharing a spinach recipe, including one the user wrote', () => {
-    const mine = [{ ...RECIPES[1], id: 'mine20', ings: ['Spinach leaves'] }];
-    expect(task(fresh({ mine, shared: ['mine20'] })).g3).toBe(true);
-    expect(task(fresh({ shared: ['tacos'] })).g3).toBe(false);
-  });
-  it('counts done across all three', () => {
-    expect(task(fresh({ pantry: [spinach], saved: ['frittata'], shared: ['frittata'] })).done).toBe(3);
-  });
 });
 
 describe('expLabel', () => {
