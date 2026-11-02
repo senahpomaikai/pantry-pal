@@ -43,16 +43,25 @@ async function cookFrittata(page: Page) {
 for (const [name, url, showsCard] of [['control', A, false], ['impact message', B, true]] as const) {
   test(`${name}: Task 1, then Task 2`, async ({ page }) => {
     await page.goto(url);
+    await expect(page).toHaveURL(/\/[AB]\/$/);
+    // A marker that a reload would wipe, and the Back history, to prove the URL changes in place.
+    await page.evaluate(() => { (window as unknown as { marker: number }).marker = 1; });
+    const history = await page.evaluate(() => window.history.length);
     await finishSetup(page);
+    await expect(page).toHaveURL(/\?task=1$/);
 
     // Both versions share the same layout.
     await expect(nav(page).getByRole('button')).toHaveText(['Home', 'Pantry', 'Add', 'Recipes', 'Me']);
 
     await addGroceries(page);
+    await expect(page).toHaveURL(/\?task=2$/);
     await expect(page.getByRole('dialog')).toHaveCount(0); // adding food never shows the card
 
     await cookFrittata(page);
+    await expect(page).toHaveURL(/\?task=2$/);
     await page.getByRole('button', { name: 'Update my pantry' }).click();
+    await expect(page).toHaveURL(/\?task=done$/);
+    expect(await page.evaluate(() => [(window as unknown as { marker: number }).marker, window.history.length])).toEqual([1, history]);
 
     const card = page.getByRole('dialog', { name: 'Your impact' });
     if (showsCard) {
@@ -146,6 +155,11 @@ test('the homepage offers both versions', async ({ page }) => {
   await page.getByRole('link', { name: /Version A/ }).click();
   await expect(page).toHaveURL(/\/pantry-pal\/A\/$/);
   await expect(page.locator('html')).toHaveAttribute('data-variant', 'a');
+});
+
+test('the task stays in step with the app, keeping other values', async ({ page }) => {
+  await page.goto(A + '?intro=0&task=done'); // a stale value from a reload is reset
+  await expect(page).toHaveURL(/\/A\/\?intro=0&task=1$/);
 });
 
 test('?v= cannot switch a build', async ({ page }) => {
