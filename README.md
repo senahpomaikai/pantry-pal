@@ -22,9 +22,9 @@ The message appears after **Update my pantry** following a cooked recipe, or **I
 | Address ends in | When |
 |---|---|
 | `/B/` (no `task`) | Welcome screen |
-| `?task=1` | After **Go to my pantry** |
-| `?task=2` | Once milk, yogurt, strawberries, ground beef and bread are all in the pantry |
-| `?task=done` | After cooking a recipe and tapping **Update my pantry** with the spinach ticked |
+| `?task=1-1` | After **Go to my pantry** |
+| `?task=1-2` | Once milk, yogurt, strawberries, ground beef and bread are all in the pantry |
+| `?task=2` | After cooking a recipe and tapping **Update my pantry** with the spinach ticked |
 
 It only moves forward, and works the same in both versions. Logic: [`src/state/task.ts`](src/state/task.ts).
 
