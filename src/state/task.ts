@@ -4,7 +4,7 @@ import { SCAN_GROCERIES, findFood } from './foods';
 import type { Action } from './reducer';
 import type { AppState, PantryItem, TaskStage } from './types';
 
-const ORDER: TaskStage[] = ['', '1', '2', 'done'];
+const ORDER: TaskStage[] = ['', '1-1', '1-2', '2'];
 const later = (a: TaskStage, b: TaskStage) => (ORDER.indexOf(b) > ORDER.indexOf(a) ? b : a);
 
 const isFood = (p: PantryItem, name: string) => findFood(p.name)?.name === name;
@@ -19,9 +19,9 @@ const usedSpinach = (before: AppState, a: Action) =>
 /** The stage after an action. It only moves forward. */
 export function nextTask(before: AppState, a: Action, after: AppState): TaskStage {
   let stage = before.task;
-  if (!after.showWelcome) stage = later(stage, '1');
-  if (stage !== '' && hasGroceries(after.pantry)) stage = later(stage, '2');
-  if (stage !== '' && usedSpinach(before, a)) stage = later(stage, 'done');
+  if (!after.showWelcome) stage = later(stage, '1-1');
+  if (stage !== '' && hasGroceries(after.pantry)) stage = later(stage, '1-2');
+  if (stage !== '' && usedSpinach(before, a)) stage = later(stage, '2');
   return stage;
 }
 

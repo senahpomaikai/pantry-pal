@@ -15,7 +15,7 @@ export function initState(flags: Flags): AppState {
   let st = createInitialState();
   if (!flags.intro) st = { ...st, showWelcome: false };
   if (flags.screen) st = applyDeepLink(st, flags.screen, flags.id);
-  return { ...st, task: st.showWelcome ? '' : '1' };
+  return { ...st, task: st.showWelcome ? '' : '1-1' };
 }
 
 /** The app's reducer, plus the test task it has reached. */
