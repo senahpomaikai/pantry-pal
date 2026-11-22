@@ -1,12 +1,13 @@
 // One typed action per prototype handler. Mirrors Main.dc.html's setState calls; no DOM or React imports.
-import { daysIn, findFood, scanFood, type Food } from './foods';
+import { findFood, scanFood, type Food } from './foods';
 import { itemImpact, recipeImpact } from './impact';
 import { blankDayForm, blankDraft, blankForms, blankLocForm, blankManual } from './seed';
+import { daysKey, importedRecipe, missingFor, receiptLines, shelfLife } from './v2';
 import {
-  draftToRecipe, draftView, findRecipe, locations, cookedCandidates, validateDuration, validatePlace,
+  draftToRecipe, draftView, findRecipe, locations, cookedCandidates, match, validateDuration, validatePlace,
 } from './selectors';
 import type {
-  Amount, AppState, DayUnit, Diet, Draft, ExpFilter, Goal, GoalKey, ManualForm, PantryItem, RecipeFilter, ScreenName, Seg, TabName, UseKind,
+  Amount, AppState, DayUnit, ReceiptSource, Diet, Draft, ExpFilter, Goal, GoalKey, ManualForm, PantryItem, RecipeFilter, ScreenName, Seg, TabName, UseKind,
 } from './types';
 
 export type Action =
@@ -45,6 +46,13 @@ export type Action =
   | { type: 'enterApp' } | { type: 'setHousehold'; household: string } | { type: 'finishSetup' }
   | { type: 'replayIntro' } | { type: 'skipOnboard' } | { type: 'nextOnboard' }
   | { type: 'dismissImpact' }
+  // v2 (revised build)
+  | { type: 'setScanQty'; qty: string } | { type: 'toggleRemember' }
+  | { type: 'readReceipt'; source: ReceiptSource } | { type: 'toggleReceiptLine'; index: number }
+  | { type: 'setReceiptQty'; index: number; qty: string } | { type: 'addReceipt' }
+  | { type: 'setShopText'; text: string } | { type: 'addShop'; name?: string } | { type: 'removeShop'; name: string } | { type: 'addMissing' }
+  | { type: 'goCombo'; ids: number[] } | { type: 'togglePick'; id: number }
+  | { type: 'setImportUrl'; url: string } | { type: 'importRecipe' } | { type: 'videoNope' }
   | { type: 'clearToast'; n: number };
 
 /* ---------- helpers (the prototype's go / back / tab / say) ---------- */
@@ -89,21 +97,28 @@ function addItem(st: AppState, item: Omit<PantryItem, 'id'>, extra: Partial<AppS
   }, item.name + ' added to your pantry');
 }
 
-const scanned = (food: Food, loc: string, days: number) => ({ name: food.name, qty: food.qty, loc, days });
+const scanned = (food: Food, qty: string, loc: string, days: number) => ({ name: food.name, qty: qty || food.qty, loc, days });
+
+/** v2: keep a shelf life the tester set by hand, for next time. Off (and so a no-op) in A and B. */
+function rememberDays(st: AppState, name: string, loc: string, days: number, byHand: boolean): AppState {
+  if (!st.rememberDays || !byHand || !name.trim()) return st;
+  return { ...st, savedDays: { ...st.savedDays, [daysKey(name, loc)]: days } };
+}
 
 /** Changing place moves the days to that food's timeline, unless the tester chose the days by hand. */
-function formWithPlace(f: ManualForm, loc: string): ManualForm {
-  const days = f.daysSet ? null : daysIn(findFood(f.name), loc);
-  return { ...f, loc, days: days ?? f.days };
+function formWithPlace(st: AppState, f: ManualForm, loc: string): ManualForm {
+  if (f.daysSet) return { ...f, loc };
+  const { days, saved } = shelfLife(st, f.name, loc);
+  return { ...f, loc, days: days ?? f.days, daysSaved: saved };
 }
 
 function scanWithPlace(st: AppState, loc: string): AppState {
-  const days = st.scanDaysSet ? null : daysIn(scanFood(st.scanIdx), loc);
+  const days = st.scanDaysSet ? null : shelfLife(st, scanFood(st.scanIdx).name, loc).days;
   return { ...st, scanLoc: loc, scanDays: days ?? st.scanDays };
 }
 
 function pickLoc(st: AppState, v: string): AppState {
-  return st.screen === 'scanResult' ? scanWithPlace(st, v) : { ...st, f: formWithPlace(st.f, v) };
+  return st.screen === 'scanResult' ? scanWithPlace(st, v) : { ...st, f: formWithPlace(st, st.f, v) };
 }
 
 function pickDays(st: AppState, v: number): AppState {
@@ -152,26 +167,31 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'goManualFromScan': return { ...st, screen: 'manual', ...blankForms() };
     case 'simScan': {
       const food = scanFood(st.scanIdx);
-      return { ...st, screen: 'scanResult', scanLoc: food.loc, scanDays: daysIn(food, food.loc) ?? 5, scanDaysSet: false, ...blankForms() };
+      return { ...st, screen: 'scanResult', scanLoc: food.loc, scanDays: shelfLife(st, food.name, food.loc).days ?? 5, scanDaysSet: false, scanQty: food.qty, ...blankForms() };
     }
     case 'rescan': return { ...st, screen: 'scan', ...blankForms() };
-    case 'addScanned':
-      return addItem(st, scanned(scanFood(st.scanIdx), st.scanLoc, st.scanDays), { screen: 'scan', scanIdx: st.scanIdx + 1 });
+    case 'addScanned': {
+      const food = scanFood(st.scanIdx);
+      const kept = rememberDays(st, food.name, st.scanLoc, st.scanDays, st.scanDaysSet);
+      return addItem(kept, scanned(food, st.scanQty, st.scanLoc, st.scanDays), { screen: 'scan', scanIdx: st.scanIdx + 1 });
+    }
     case 'setScanLoc': return scanWithPlace(st, a.loc);
     case 'setScanDays': return pickDays(st, a.days);
     case 'setF': {
       const f = { ...st.f, ...a.patch, daysSet: st.f.daysSet || a.patch.days !== undefined };
-      return { ...st, f: a.patch.loc ? formWithPlace(f, a.patch.loc) : f };
+      return { ...st, f: a.patch.loc ? formWithPlace(st, f, a.patch.loc) : f };
     }
     case 'pickFood': {
       const food = findFood(a.name);
       if (!food) return { ...st, f: { ...st.f, name: a.name } };
-      return { ...st, f: { ...st.f, name: food.name, qty: food.qty, loc: food.loc, days: daysIn(food, food.loc) ?? st.f.days, daysSet: false, picked: food.name } };
+      const life = shelfLife(st, food.name, food.loc);
+      return { ...st, f: { ...st.f, name: food.name, qty: food.qty, loc: food.loc, days: life.days ?? st.f.days, daysSet: false, daysSaved: life.saved, picked: food.name } };
     }
     case 'addManual': {
       const name = st.f.name.trim();
       if (!name) return st;
-      return addItem(st, { name, qty: st.f.qty.trim(), loc: st.f.loc, days: st.f.days }, { f: blankManual() });
+      const kept = rememberDays(st, name, st.f.loc, st.f.days, st.f.daysSet);
+      return addItem(kept, { name, qty: st.f.qty.trim(), loc: st.f.loc, days: st.f.days }, { f: blankManual() });
     }
     case 'doneAdding': return toPantry(st);
 
@@ -303,5 +323,49 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'nextOnboard': return { ...st, onboard: st.onboard >= 3 ? 0 : st.onboard + 1 };
     case 'dismissImpact': return { ...st, impact: null, toast: { ...st.toast, text: '' } };
     case 'clearToast': return a.n === st.toast.n ? { ...st, toast: { ...st.toast, text: '' } } : st;
+
+    /* ---------- v2 ---------- */
+    case 'setScanQty': return { ...st, scanQty: a.qty };
+    case 'toggleRemember': return { ...st, rememberDays: !st.rememberDays };
+    case 'readReceipt': return { ...st, receipt: receiptLines(st), receiptSource: a.source };
+    case 'toggleReceiptLine': return { ...st, receipt: st.receipt.map((l, i) => (i === a.index ? { ...l, on: !l.on } : l)) };
+    case 'setReceiptQty': return { ...st, receipt: st.receipt.map((l, i) => (i === a.index ? { ...l, qty: a.qty } : l)) };
+    case 'addReceipt': {
+      const lines = st.receipt.filter((l) => l.on);
+      if (!lines.length) return st;
+      const items = lines.map((l, i) => ({ id: st.nextId + i, name: l.name, qty: l.qty, loc: l.loc, days: l.days }));
+      const added: AppState = {
+        ...toPantry(st), pantry: st.pantry.concat(items), nextId: st.nextId + items.length, receipt: [], receiptSource: null,
+        shopping: st.shopping.filter((n) => !lines.some((l) => match(l.name, n))),
+      };
+      return say(added, items.length + ' item' + (items.length > 1 ? 's' : '') + ' added from your ' + (st.receiptSource === 'store' ? 'store order' : 'receipt'));
+    }
+    case 'setShopText': return { ...st, shopText: a.text };
+    case 'addShop': {
+      const v = (a.name ?? st.shopText).trim();
+      if (!v) return st;
+      if (st.shopping.some((n) => n.toLowerCase() === v.toLowerCase())) return say({ ...st, shopText: '' }, v + ' is already on your list');
+      return { ...st, shopping: st.shopping.concat([v]), shopText: '' };
+    }
+    case 'removeShop': return { ...st, shopping: st.shopping.filter((n) => n !== a.name) };
+    case 'addMissing': {
+      const r = findRecipe(st, st.recipeId);
+      if (!r) return st;
+      const add = missingFor(st.pantry, r).filter((n) => !st.shopping.some((x) => x.toLowerCase() === n.toLowerCase()));
+      if (!add.length) return say(st, 'Everything you need is already on your list');
+      return say({ ...st, shopping: st.shopping.concat(add) }, add.length + ' item' + (add.length > 1 ? 's' : '') + ' added to your shopping list');
+    }
+    case 'goCombo': return go(st, 'combo', { pick: a.ids });
+    case 'togglePick': return { ...st, pick: toggle(st.pick, a.id) };
+    case 'setImportUrl': return { ...st, importUrl: a.url };
+    case 'videoNope': return say(st, 'Step-by-step videos are pretend in this prototype');
+    case 'importRecipe': {
+      if (!st.importUrl.trim()) return st;
+      const id = 'mine' + st.nextId;
+      return say({
+        ...st, mine: st.mine.concat([importedRecipe(st.importUrl, id)]), saved: st.saved.concat([id]), nextId: st.nextId + 1, importUrl: '',
+        screen: 'recipe', recipeId: id, stack: [{ screen: 'recipes' }], seg: 'mine', nav: 'forward',
+      }, 'Imported to My recipes');
+    }
   }
 }

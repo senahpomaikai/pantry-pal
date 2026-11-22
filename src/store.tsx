@@ -5,7 +5,8 @@ import { reducer, type Action } from './state/reducer';
 import { createInitialState } from './state/seed';
 import { nextTask, taskUrl } from './state/task';
 import type { AppState } from './state/types';
-import type { Flags } from './variants';
+import { V2_RECIPES } from './state/v2';
+import { REVISED, type Flags } from './variants';
 
 interface Store { state: AppState; dispatch: Dispatch<Action> }
 
@@ -13,6 +14,7 @@ const StoreContext = createContext<Store | null>(null);
 
 export function initState(flags: Flags): AppState {
   let st = createInitialState();
+  if (REVISED) st = { ...st, bonus: V2_RECIPES, rememberDays: true };
   if (!flags.intro) st = { ...st, showWelcome: false };
   if (flags.screen) st = applyDeepLink(st, flags.screen, flags.id);
   return { ...st, task: st.showWelcome ? '' : '1-1' };

@@ -5,6 +5,10 @@ import { SCAN_DAY_PRESETS } from '../state/seed';
 import { scanFood } from '../state/foods';
 import { dayFmt, dayOpts, locations } from '../state/selectors';
 import { useStore } from '../store';
+import { REVISED } from '../variants';
+import { DaysHint, DupWarning, SizeField } from '../components/V2Fields';
+import { Photo, foodPhoto } from '../components/Photo';
+import { duplicateOf, shelfLife } from '../state/v2';
 
 export function Scan() {
   const { state, dispatch } = useStore();
@@ -34,9 +38,11 @@ export function ScanResult() {
       <div className="topbar"><BackButton /><p className="title">We found</p></div>
       <div className="scroll">
         <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          <div className="ph" style={{ width: 88, height: 88 }}>{food.name.toLowerCase()}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="h2">{food.name}</span><span className="muted">{food.qty}</span></div>
+          {REVISED ? <Photo src={foodPhoto(food.name)} style={{ width: 88, height: 88 }} label={food.name.toLowerCase()} /> : <div className="ph" style={{ width: 88, height: 88 }}>{food.name.toLowerCase()}</div>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="h2">{food.name}</span><span className="muted">{REVISED ? state.scanQty : food.qty}</span></div>
         </div>
+        {REVISED && <DupWarning item={duplicateOf(state.pantry, food.name)} />}
+        {REVISED && <SizeField id="s-qty" name={food.name} value={state.scanQty} onChange={(qty) => dispatch({ type: 'setScanQty', qty })} />}
         <div className="field">
           <span className="label" id="s-where">Where will you keep it?</span>
           <ChipGroup labelledBy="s-where" options={chipsOf(locations(state), state.scanLoc)} onPick={(loc) => dispatch({ type: 'setScanLoc', loc })} />
@@ -46,7 +52,7 @@ export function ScanResult() {
           <span className="label" id="s-days">Good for about</span>
           <ChipGroup labelledBy="s-days" options={chipsOf(dayOpts(SCAN_DAY_PRESETS, state.scanDays), state.scanDays, dayFmt)} onPick={(days) => dispatch({ type: 'setScanDays', days })} />
           <CustomTime />
-          <span className="small muted">Our guess. Change it if needed.</span>
+          {REVISED ? <DaysHint name={food.name} loc={state.scanLoc} byHand={state.scanDaysSet} saved={shelfLife(state, food.name, state.scanLoc).saved} /> : <span className="small muted">Our guess. Change it if needed.</span>}
         </div>
         <button className="btn btn-primary btn-block" onClick={() => dispatch({ type: 'addScanned' })}>Add to my pantry</button>
         <button className="btn btn-ghost" onClick={() => dispatch({ type: 'rescan' })}>Scan again</button>

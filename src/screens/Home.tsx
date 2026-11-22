@@ -2,6 +2,8 @@ import { Icon } from '../components/Icon';
 import { RecipeRow } from '../components/RecipeRow';
 import { homeGoal, soonItems, topRecipes } from '../state/selectors';
 import { useStore } from '../store';
+import { REVISED } from '../variants';
+import { Photo, foodPhoto } from '../components/Photo';
 
 export function Home() {
   const { state, dispatch } = useStore();
@@ -18,9 +20,20 @@ export function Home() {
         </button>
       </div>
       <div className="scroll">
-        <button className="btn btn-primary btn-block" style={{ minHeight: 56, fontSize: 17, marginTop: 4 }} onClick={() => dispatch({ type: 'go', screen: 'scan' })}>
-          <Icon name="scan" />Scan groceries
-        </button>
+        {REVISED ? (
+          <div className="section" style={{ gap: 8 }}>
+            <h2 className="h2">Add groceries</h2>
+            <div className="addtiles">
+              <button className="addtile primary" onClick={() => dispatch({ type: 'go', screen: 'receipt' })}><Icon name="task" />Scan receipt<span>Add a whole shop</span></button>
+              <button className="addtile" onClick={() => dispatch({ type: 'go', screen: 'scan' })}><Icon name="scan" />Scan item<span>Barcode</span></button>
+              <button className="addtile" onClick={() => dispatch({ type: 'go', screen: 'manual' })}><Icon name="pencil" />Type it<span>Autofills</span></button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn-primary btn-block" style={{ minHeight: 56, fontSize: 17, marginTop: 4 }} onClick={() => dispatch({ type: 'go', screen: 'scan' })}>
+            <Icon name="scan" />Scan groceries
+          </button>
+        )}
 
         <div className="section">
           <div className="sechead">
@@ -31,7 +44,7 @@ export function Home() {
             <div className="hscroll">
               {soon.map((p) => (
                 <button key={p.id} className="mini" onClick={() => dispatch({ type: 'go', screen: 'item', itemId: p.id })}>
-                  <div className="ph" style={{ height: 64 }}>food</div>
+                  {REVISED ? <Photo src={foodPhoto(p.name)} style={{ height: 64 }} label="food" /> : <div className="ph" style={{ height: 64 }}>food</div>}
                   <span style={{ fontWeight: 600 }}>{p.name}</span>
                   <span className="tag warn" style={{ alignSelf: 'flex-start' }}>{p.exp}</span>
                 </button>
@@ -40,9 +53,16 @@ export function Home() {
           ) : (
             <p className="muted" style={{ margin: 0 }}>Nothing is close to expiring.</p>
           )}
-          {soon.length > 0 && <button className="btn btn-block" onClick={() => dispatch({ type: 'cookExpiring' })}><Icon name="pot" size="sm" />Cook what’s expiring</button>}
+          {soon.length > 0 && (REVISED
+            ? <button className="btn btn-block" onClick={() => dispatch({ type: 'goCombo', ids: soon.map((p) => p.id) })}><Icon name="pot" size="sm" />Find one recipe for all {soon.length}</button>
+            : <button className="btn btn-block" onClick={() => dispatch({ type: 'cookExpiring' })}><Icon name="pot" size="sm" />Cook what’s expiring</button>)}
         </div>
 
+        {REVISED && (
+          <button className="lrow sky" onClick={() => dispatch({ type: 'go', screen: 'shopping' })}>
+            <Icon name="goals" size="sm" /><span className="grow">Shopping list</span><span className="small muted">{state.shopping.length ? state.shopping.length + ' items' : 'Check before you buy'}</span><Icon name="chevron" size="sm" />
+          </button>
+        )}
         <button className="lrow sky" onClick={() => dispatch({ type: 'go', screen: 'goals' })}>
           <Icon name="goals" size="sm" /><span className="grow">{goal.title}</span><span className="small muted">{goal.right}</span><Icon name="chevron" size="sm" />
         </button>

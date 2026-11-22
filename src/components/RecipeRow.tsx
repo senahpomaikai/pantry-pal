@@ -1,5 +1,7 @@
 import type { RecipeCard } from '../state/selectors';
+import { REVISED } from '../variants';
 import { Icon } from './Icon';
+import { Photo, recipePhoto } from './Photo';
 
 /** The `.rcard` row used on Home, Recipes, Item detail and Shared with me. */
 export function RecipeRow({ r, onOpen, showSoon = false, showFrom = false }: {
@@ -7,7 +9,7 @@ export function RecipeRow({ r, onOpen, showSoon = false, showFrom = false }: {
 }) {
   return (
     <button className="rcard" onClick={onOpen}>
-      <div className="ph" style={{ width: 64, height: 64 }}>photo</div>
+      {REVISED ? <Photo src={recipePhoto(r.id, r.ings[0])} style={{ width: 64, height: 64 }} /> : <div className="ph" style={{ width: 64, height: 64 }}>photo</div>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0, flex: 1 }}>
         {showFrom && <span className="small muted" style={{ fontWeight: 600 }}>From {r.by}</span>}
         <span className="h3">{r.title}</span>

@@ -3,6 +3,8 @@ import { Icon } from '../components/Icon';
 import { BackButton } from '../components/TopBar';
 import { EXP_OPTIONS, locations, pantryFilterParts, pantryRows } from '../state/selectors';
 import { useStore } from '../store';
+import { REVISED } from '../variants';
+import { Photo, foodPhoto } from '../components/Photo';
 
 export function Pantry() {
   const { state, dispatch } = useStore();
@@ -14,6 +16,7 @@ export function Pantry() {
       <div className="topbar">
         {state.stack.length > 0 && <BackButton />}
         <p className="title">My pantry <span className="muted" style={{ fontWeight: 500, fontSize: 15 }}>({state.pantry.length})</span></p>
+        {REVISED && <button className="btn btn-primary" style={{ minHeight: 44, padding: '0 14px' }} onClick={() => dispatch({ type: 'openAdd' })}><Icon name="plus" size="sm" />Add</button>}
         <button className="btn filterbtn" style={{ minHeight: 44 }} aria-expanded={state.pFiltersOpen} aria-controls="pantry-filters"
           aria-label={count ? 'Filters, ' + count + ' on' : 'Filters'} onClick={() => dispatch({ type: 'togglePFilters' })}>
           <Icon name="filter" size="sm" />Filters{count > 0 && <span className="cbadge">{count}</span>}
@@ -30,6 +33,11 @@ export function Pantry() {
             </div>
           </div>
         </div>
+        {REVISED && state.pantry.length > 0 && (
+          <button className="lrow sky" onClick={() => dispatch({ type: 'goCombo', ids: [] })}>
+            <Icon name="pot" size="sm" /><span className="grow">Pick items to cook together</span><Icon name="chevron" size="sm" />
+          </button>
+        )}
         {count > 0 && !state.pFiltersOpen && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <span className="small muted">{parts.join(' · ')}</span>
@@ -39,7 +47,7 @@ export function Pantry() {
         <div className="group pantry-list">
           {rows.map((p) => (
             <button key={p.id} className="prow" onClick={() => dispatch({ type: 'go', screen: 'item', itemId: p.id })}>
-              <div className="ph" style={{ width: 44, height: 44, borderRadius: 10 }} />
+              {REVISED ? <Photo src={foodPhoto(p.name)} style={{ width: 44, height: 44, borderRadius: 10 }} /> : <div className="ph" style={{ width: 44, height: 44, borderRadius: 10 }} />}
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <span style={{ fontWeight: 600 }}>{p.name}</span>
                 <span className="small muted">{p.sub}</span>

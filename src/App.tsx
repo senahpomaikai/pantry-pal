@@ -24,6 +24,10 @@ import { Scan, ScanResult } from './screens/Scan';
 import { Shared } from './screens/Shared';
 import { UseUp } from './screens/UseUp';
 import { WriteRecipe } from './screens/WriteRecipe';
+import { Combo } from './screens/v2/Combo';
+import { Import } from './screens/v2/Import';
+import { Receipt } from './screens/v2/Receipt';
+import { Shopping } from './screens/v2/Shopping';
 import type { ScreenName } from './state/types';
 import { useStore } from './store';
 import { VARIANT } from './variants';
@@ -32,6 +36,7 @@ const SCREENS: Record<ScreenName, () => ReactElement> = {
   home: Home, pantry: Pantry, item: ItemDetail, scan: Scan, scanResult: ScanResult, manual: AddItem,
   recipes: Recipes, recipe: RecipeDetail, cook: CookMode, useup: UseUp, create: WriteRecipe,
   shared: Shared, notifs: Notifications, profile: Me, goals: Goals, reminders: Reminders, diet: Diet, help: About,
+  receipt: Receipt, shopping: Shopping, combo: Combo, import: Import,
 };
 
 export function App() {

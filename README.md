@@ -12,6 +12,7 @@ It works on a phone or a laptop. Nothing a tester does is saved, so refreshing t
 |---|---|---|
 | **Version A** (control) | https://senahpomaikai.github.io/pantry-pal/A/ | No impact message |
 | **Version B** | https://senahpomaikai.github.io/pantry-pal/B/ | After food is used or a recipe is cooked: "You saved ~$## and ## lbs of food from going to the landfill" |
+| **Version 2** (revised) | https://senahpomaikai.github.io/pantry-pal/v2/ | Version B plus the changes from our user-test analysis (below) |
 
 Give each tester a direct `/A/` or `/B/` link. The capital letter matters.
 
@@ -28,6 +29,23 @@ The message appears after **Update my pantry** following a cooked recipe, or **I
 
 It only moves forward, and works the same in both versions. Logic: [`src/state/task.ts`](src/state/task.ts).
 
+## Version 2: changes from user testing
+
+A and B stay live exactly as tested, so they serve as the copy to refer back to. Version 2 is built from the same code with `VITE_VARIANT=v2`; every change is gated by `REVISED` in [`src/variants.ts`](src/variants.ts).
+
+| Change | Whose analysis it came from | Finding |
+|---|---|---|
+| **"You already have this" warnings** when typing, scanning or importing an item that's already in the pantry | Senah (Prefers_App) | Believing the app prevents duplicate buys was the only significant predictor of preferring Pantry Pal (+22 points, p = .005) |
+| **Shopping list that checks the pantry**: type an item at the store to see if it's at home, add a recipe's missing ingredients in one tap, shared with the household | Senah (Prefers_App) | Same; themes 3 and 5 (checking stock from the store, whole-household use) |
+| **Cook with several items at once**: pick spinach + chicken (or every expiring item) and get recipes ranked by how many they use; two new recipes combine them | Madison (Use_Before_Expire) | B21 let spinach spoil because no recipe used both; theme 4 |
+| **Add groceries is visible right away**: three add options at the top of Home and an Add button on the Pantry screen | Madison (recordings) | Participants explored the page before finding how to add food |
+| **Package sizes you can change**: common sizes as chips (quart / half gallon / gallon) plus a free-text size, on Add, Scan and Receipt | Annabelle (Ease_Track) | Participants were confused by fixed measurements |
+| **Less expiration entry**: shelf life fills in from the storage spot with a note on where it came from; a time set by hand can be saved as your default | Annabelle (Ease_Track, Resourceful) | Ease_Track rose with autofill (+1.43, p = .015); manual dates were the main complaint |
+| **Add a whole shop at once** from a receipt photo or a store order (e.g. Walmart), with sizes and dates filled in | Karen (Effort_Worth) | Effort_Worth fell (−0.46); about half said manual entry cost more time than it saved; B5 asked for receipts |
+| **Better recipe discovery**: recipe photos, a step-by-step video, import a recipe from a link | Karen (Ease_Recipe) | Ease_Recipe barely moved (+0.11, p = .87); users asked for images, videos and their own recipes |
+
+The camera, receipt reader, store import and videos are pretend, as the scanner was in A and B.
+
 The step-by-step plan is in [docs/Pantry_Pal_Next_Steps.pdf](docs/Pantry_Pal_Next_Steps.pdf).
 
 ---
@@ -38,7 +56,7 @@ Requires Node 20+.
 
 ```sh
 npm install
-npm run dev          # http://localhost:5173/pantry-pal/ (Version A; VITE_VARIANT=b npm run dev for B)
+npm run dev          # http://localhost:5173/pantry-pal/ (Version A; VITE_VARIANT=b or VITE_VARIANT=v2 for the others)
 npm test             # unit tests
 npm run e2e          # Playwright (build first; `npx playwright install chromium` once)
 npm run screenshots  # 390x844 @2x PNGs for UXtweak image tests → screenshots/{A,B}/
@@ -56,7 +74,7 @@ Pushing to `main` deploys to GitHub Pages in about a minute. CI runs typecheck, 
 | `screen` | `home` `pantry` `recipes` `me` `scan` `scanresult` `add` `recipe` `cook` `share` | Open straight to a screen. `recipe`/`cook`/`share` take `id=` (default `frittata`) |
 | `task` | set by the app | Test progress for UXtweak (see above). Ignored on load. If UXtweak misses the changes, switch `HISTORY_METHOD` in [`src/store.tsx`](src/store.tsx) to `pushState` |
 
-**Versions:** each is its own build (`scripts/build.mjs`), so a tester can't switch. What differs lives in `VARIANT_CONFIG` in [`src/variants.ts`](src/variants.ts).
+**Versions:** each is its own build (`scripts/build.mjs`), so a tester can't switch. What differs lives in `VARIANT_CONFIG` in [`src/variants.ts`](src/variants.ts). Version 2's screens are in `src/screens/v2/` and its logic in `src/state/v2.ts`.
 
 **Food data:** `src/state/foods.ts` holds the fixed food table and notes the price and shelf-life source for each food. `src/state/impact.ts` does the savings math.
 

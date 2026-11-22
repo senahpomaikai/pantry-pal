@@ -182,3 +182,10 @@ test.describe('desktop laptop (1366x768)', () => {
     await expect(page.getByText('Scan an item')).toBeVisible();
   });
 });
+
+test('the homepage links to the revised version 2', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('link', { name: /Version 2/ }).click();
+  await expect(page).toHaveURL(/\/pantry-pal\/v2\/$/);
+  await expect(page.locator('html')).toHaveAttribute('data-variant', 'v2');
+});

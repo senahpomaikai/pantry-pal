@@ -5,6 +5,7 @@ import { BackButton } from '../components/TopBar';
 import { RECIPE_FILTERS, recipeList } from '../state/selectors';
 import type { Seg } from '../state/types';
 import { useStore } from '../store';
+import { REVISED } from '../variants';
 
 const SEGS: [Seg, string][] = [['discover', 'Discover'], ['saved', 'Saved'], ['mine', 'Mine']];
 
@@ -51,8 +52,16 @@ export function Recipes() {
             </div>
           </div>
         )}
+        {!mine && REVISED && state.seg === 'discover' && (
+          <button className="lrow sky" onClick={() => dispatch({ type: 'goCombo', ids: [] })}>
+            <Icon name="pot" size="sm" /><span className="grow">Pick several ingredients to use together</span><Icon name="chevron" size="sm" />
+          </button>
+        )}
         {mine && (
-          <button className="btn btn-primary btn-block" onClick={() => dispatch({ type: 'goCreate' })}><Icon name="plus" size="sm" />Write a new recipe</button>
+          <div className={REVISED ? 'btn-row' : undefined}>
+            <button className="btn btn-primary btn-block" onClick={() => dispatch({ type: 'goCreate' })}><Icon name="plus" size="sm" />Write a new recipe</button>
+            {REVISED && <button className="btn btn-block" onClick={() => dispatch({ type: 'go', screen: 'import' })}><Icon name="link" size="sm" />Import from a link</button>}
+          </div>
         )}
         {list.map((r) => <RecipeRow key={r.id} r={r} showSoon onOpen={() => dispatch({ type: 'go', screen: 'recipe', recipeId: r.id })} />)}
         {list.length === 0 && (

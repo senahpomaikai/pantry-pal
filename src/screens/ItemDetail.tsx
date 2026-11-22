@@ -3,6 +3,8 @@ import { RecipeRow } from '../components/RecipeRow';
 import { BackButton } from '../components/TopBar';
 import { itemView } from '../state/selectors';
 import { useStore } from '../store';
+import { REVISED } from '../variants';
+import { Photo, foodPhoto } from '../components/Photo';
 
 export function ItemDetail() {
   const { state, dispatch } = useStore();
@@ -12,7 +14,7 @@ export function ItemDetail() {
     <div className="screen">
       <div className="topbar"><BackButton /><p className="title">{item?.name}</p></div>
       <div className="scroll">
-        <div className="ph" style={{ height: 150 }}>photo of item</div>
+        {REVISED ? <Photo src={item ? foodPhoto(item.name) : undefined} style={{ height: 150 }} label="photo of item" /> : <div className="ph" style={{ height: 150 }}>photo of item</div>}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="h2">{item?.name}</span><span className="muted">{item?.sub}</span></div>
           <span className={'tag ' + (item?.tagCls ?? '')} style={{ fontSize: 14 }}>{item?.expLong}</span>
@@ -23,6 +25,7 @@ export function ItemDetail() {
         </div>
         <div className="section">
           <h2 className="h2">Recipes with {item?.lower}</h2>
+          {REVISED && item && <button className="btn" onClick={() => dispatch({ type: 'goCombo', ids: [item.id] })}><Icon name="plus" size="sm" />Use it with other items</button>}
           {recipes.map((r) => <RecipeRow key={r.id} r={r} onOpen={() => dispatch({ type: 'go', screen: 'recipe', recipeId: r.id })} />)}
           {recipes.length === 0 && (
             <>

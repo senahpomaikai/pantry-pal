@@ -22,8 +22,11 @@ export const soon = (pantry: PantryItem[], ing: string) => {
   return !!p && p.days <= 3;
 };
 
-export const allRecipes = (st: Pick<AppState, 'mine'>): Recipe[] => RECIPES.concat(st.mine);
-export const findRecipe = (st: Pick<AppState, 'mine'>, id: string | null) => allRecipes(st).find((r) => r.id === id);
+type Catalog = Pick<AppState, 'mine'> & Partial<Pick<AppState, 'bonus'>>;
+/** The built-in recipes plus v2's extra ones (empty in A and B). */
+const catalog = (st: Partial<Pick<AppState, 'bonus'>>): Recipe[] => RECIPES.concat(st.bonus ?? []);
+export const allRecipes = (st: Catalog): Recipe[] => catalog(st).concat(st.mine);
+export const findRecipe = (st: Catalog, id: string | null) => allRecipes(st).find((r) => r.id === id);
 
 /* ---------- formatting ---------- */
 
@@ -75,6 +78,7 @@ const TAB_GROUP: Partial<Record<ScreenName, TabName>> = {
   pantry: 'pantry', item: 'pantry', manual: 'pantry', scanResult: 'pantry',
   recipes: 'recipes', recipe: 'recipes',
   profile: 'profile', goals: 'profile', shared: 'profile', reminders: 'profile', diet: 'profile',
+  receipt: 'pantry', shopping: 'home', combo: 'recipes', import: 'recipes',
 };
 
 export const tabGroup = (screen: ScreenName): TabName | '' => TAB_GROUP[screen] ?? '';
@@ -132,8 +136,8 @@ export function recipeCard(pantry: PantryItem[], r: Recipe): RecipeCard {
 
 const score = (c: RecipeCard) => c.have / c.total + (c.usesSoon ? 0.3 : 0);
 
-export function topRecipes(st: Pick<AppState, 'pantry'>): RecipeCard[] {
-  const own = RECIPES.filter((r) => !r.friend).map((r) => recipeCard(st.pantry, r));
+export function topRecipes(st: Pick<AppState, 'pantry'> & Partial<Pick<AppState, 'bonus'>>): RecipeCard[] {
+  const own = catalog(st).filter((r) => !r.friend).map((r) => recipeCard(st.pantry, r));
   return own.sort((a, b) => score(b) - score(a)).slice(0, 3);
 }
 
@@ -149,10 +153,10 @@ export function applyRecipeFilters(list: RecipeCard[], filters: RecipeFilter[], 
   return list;
 }
 
-export function recipeList(st: Pick<AppState, 'seg' | 'saved' | 'mine' | 'q' | 'filters' | 'diet' | 'pantry'>) {
+export function recipeList(st: Pick<AppState, 'seg' | 'saved' | 'mine' | 'q' | 'filters' | 'diet' | 'pantry'> & Partial<Pick<AppState, 'bonus'>>) {
   const F = st.filters;
   const base = st.seg === 'discover'
-    ? RECIPES.filter((r) => !r.friend)
+    ? catalog(st).filter((r) => !r.friend)
     : st.seg === 'saved' ? st.saved.map((id) => findRecipe(st, id)).filter((r): r is Recipe => !!r) : st.mine;
   let list = base.map((r) => recipeCard(st.pantry, r));
   const q = st.q.trim().toLowerCase();

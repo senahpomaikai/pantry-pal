@@ -3,7 +3,9 @@
 export type ScreenName =
   | 'home' | 'pantry' | 'item' | 'scan' | 'scanResult' | 'manual'
   | 'recipes' | 'recipe' | 'cook' | 'useup' | 'create'
-  | 'shared' | 'notifs' | 'profile' | 'goals' | 'reminders' | 'diet' | 'help';
+  | 'shared' | 'notifs' | 'profile' | 'goals' | 'reminders' | 'diet' | 'help'
+  // v2 only
+  | 'receipt' | 'shopping' | 'combo' | 'import';
 
 export type TabName = 'home' | 'pantry' | 'recipes' | 'profile';
 
@@ -77,7 +79,21 @@ export interface ManualForm {
   daysSet: boolean;
   /** Name of the suggestion just picked, which closes the list until the name changes. */
   picked: string;
+  /** v2: the days came from the tester's own saved default. */
+  daysSaved?: boolean;
 }
+
+/** v2: one line read off a pretend receipt or store order. */
+export interface ReceiptLine {
+  name: string;
+  qty: string;
+  loc: string;
+  days: number;
+  on: boolean;
+}
+
+/** v2: where the receipt lines came from. */
+export type ReceiptSource = 'receipt' | 'store';
 
 export interface LocForm {
   open: boolean;
@@ -170,4 +186,22 @@ export interface AppState {
   diet: Diet[];
   locForm: LocForm;
   dayForm: DayForm;
+
+  /* ---------- v2 (revised build) only; inert in A and B ---------- */
+  /** Extra recipes in the catalog. Empty in A and B. */
+  bonus: Recipe[];
+  /** Remember shelf lives the tester sets by hand, per food and place. Off in A and B. */
+  rememberDays: boolean;
+  /** Saved shelf lives, keyed "food name|place". */
+  savedDays: Record<string, number>;
+  /** Package size chosen on the scan result. */
+  scanQty: string;
+  receipt: ReceiptLine[];
+  receiptSource: ReceiptSource | null;
+  /** Shopping list. */
+  shopping: string[];
+  shopText: string;
+  /** Pantry items picked to cook with together. */
+  pick: number[];
+  importUrl: string;
 }

@@ -6,6 +6,9 @@ import { suggestFoods } from '../state/foods';
 import { MANUAL_DAY_PRESETS, QUICK_PICKS } from '../state/seed';
 import { dayFmt, dayOpts, locations } from '../state/selectors';
 import { useStore } from '../store';
+import { REVISED } from '../variants';
+import { DaysHint, DupWarning, SizeField } from '../components/V2Fields';
+import { duplicateOf } from '../state/v2';
 
 export function AddItem() {
   const { state, dispatch } = useStore();
@@ -36,15 +39,18 @@ export function AddItem() {
               ))}
             </div>
           )}
+          {REVISED && <DupWarning item={duplicateOf(state.pantry, f.name)} />}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0 14px' }}>
             <span className="small muted">Try</span>
             {QUICK_PICKS.map((n) => <button key={n} className="action" onClick={() => dispatch({ type: 'pickFood', name: n })}>{n}</button>)}
           </div>
         </div>
-        <div className="field">
-          <label className="label" htmlFor="f-qty">How much? (optional)</label>
-          <input id="f-qty" className="input" placeholder="e.g. 1 bag" value={f.qty} onChange={(e) => dispatch({ type: 'setF', patch: { qty: e.target.value } })} />
-        </div>
+        {REVISED ? <SizeField id="f-qty" name={f.name} value={f.qty} onChange={(qty) => dispatch({ type: 'setF', patch: { qty } })} /> : (
+          <div className="field">
+            <label className="label" htmlFor="f-qty">How much? (optional)</label>
+            <input id="f-qty" className="input" placeholder="e.g. 1 bag" value={f.qty} onChange={(e) => dispatch({ type: 'setF', patch: { qty: e.target.value } })} />
+          </div>
+        )}
         <div className="field">
           <span className="label" id="f-where">Where?</span>
           <ChipGroup labelledBy="f-where" options={chipsOf(locations(state), f.loc)} onPick={(loc) => dispatch({ type: 'setF', patch: { loc } })} />
@@ -54,6 +60,7 @@ export function AddItem() {
           <span className="label" id="f-days">Good for about</span>
           <ChipGroup labelledBy="f-days" options={chipsOf(dayOpts(MANUAL_DAY_PRESETS, f.days), f.days, dayFmt)} onPick={(days) => dispatch({ type: 'setF', patch: { days } })} />
           <CustomTime />
+          {REVISED && <DaysHint name={f.name} loc={f.loc} byHand={f.daysSet} saved={!!f.daysSaved} />}
         </div>
         <button className="btn btn-primary btn-block" disabled={empty} onClick={() => dispatch({ type: 'addManual' })}>Add to my pantry</button>
         {empty && state.addedNow === 0 && <span className="why">Add a name to continue</span>}
