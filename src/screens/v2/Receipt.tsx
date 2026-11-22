@@ -15,13 +15,11 @@ export function Receipt() {
   if (!state.receiptSource) {
     return (
       <div className="screen">
-        <div className="topbar"><BackButton /><p className="title">Add a whole shop</p></div>
+        <div className="topbar"><BackButton /><p className="title">Add groceries</p></div>
         <div className="scroll">
-          <p className="lead">Skip typing each item. We read your receipt or online order and fill in sizes and dates for you.</p>
           <div className="receipt-art" aria-hidden="true"><span className="note">receipt photo goes here<br />(not in this prototype)</span></div>
-          <button className="btn btn-primary btn-block" onClick={() => dispatch({ type: 'readReceipt', source: 'receipt' })}><Icon name="scan" size="sm" />Pretend to scan a receipt</button>
-          <button className="btn btn-block" onClick={() => dispatch({ type: 'readReceipt', source: 'store' })}><Icon name="link" size="sm" />Import my last store order</button>
-          <span className="small muted" style={{ textAlign: 'center' }}>Works with store accounts like Walmart, Target and Kroger (pretend).</span>
+          <button className="btn btn-primary btn-block" onClick={() => dispatch({ type: 'readReceipt', source: 'receipt' })}><Icon name="scan" size="sm" />Scan receipt</button>
+          <button className="btn btn-block" onClick={() => dispatch({ type: 'readReceipt', source: 'store' })}><Icon name="link" size="sm" />Import store order</button>
         </div>
       </div>
     );
@@ -31,7 +29,7 @@ export function Receipt() {
     <div className="screen">
       <div className="topbar"><BackButton /><p className="title">{state.receiptSource === 'store' ? 'Your store order' : 'From your receipt'}</p></div>
       <div className="scroll">
-        <p className="lead">We found {lines.length} items. Check the sizes, then add them all.</p>
+        <span className="small muted">{lines.length} items found</span>
         <div className="group receipt-list">
           {lines.map((l, i) => {
             const dup = duplicateOf(state.pantry, l.name);
@@ -42,10 +40,10 @@ export function Receipt() {
                   <Photo src={foodPhoto(l.name)} style={{ width: 40, height: 40, borderRadius: 10 }} />
                   <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontWeight: 600 }}>{l.name}</span>
-                    <span className="small muted">{l.loc} · good for about {dayFmt(l.days)}</span>
+                    <span className="small muted">{l.loc} · {dayFmt(l.days)}</span>
                   </span>
                 </button>
-                {dup && <span className="dupnote"><Icon name="info" size="xs" />Already in your pantry ({dup.qty || dup.loc})</span>}
+                {dup && <span className="dupnote"><Icon name="info" size="xs" />Already have {dup.qty || 'some'}</span>}
                 {l.on && (
                   <label className="rline-size">
                     <span className="small muted">Size</span>
@@ -59,7 +57,7 @@ export function Receipt() {
           })}
         </div>
         <button className="btn btn-primary btn-block" disabled={n === 0} onClick={() => dispatch({ type: 'addReceipt' })}>Add {n} item{n === 1 ? '' : 's'} to my pantry</button>
-        <button className="btn btn-ghost" onClick={() => dispatch({ type: 'go', screen: 'manual' })}>Something missing? Type it in</button>
+        <button className="btn btn-ghost" onClick={() => dispatch({ type: 'go', screen: 'manual' })}>Type a missing item</button>
       </div>
     </div>
   );

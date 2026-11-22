@@ -2,11 +2,15 @@
 
 A clickable prototype of Pantry Pal, an app for cooking what you already have, built for our IS 551 user tests.
 
-**Open the app:** https://senahpomaikai.github.io/pantry-pal/ lets you pick a version.
+**Open the app:** https://senahpomaikai.github.io/pantry-pal/ lets you pick a version:
+
+- [Version A](https://senahpomaikai.github.io/pantry-pal/A/): control, as tested
+- [Version B](https://senahpomaikai.github.io/pantry-pal/B/): impact message, as tested
+- [Version 2](https://senahpomaikai.github.io/pantry-pal/v2/): revised after user testing
 
 It works on a phone or a laptop. Nothing a tester does is saved, so refreshing the page starts fresh.
 
-## The two versions (A/B test)
+## The versions
 
 | | Link | What's different |
 |---|---|---|
@@ -36,9 +40,9 @@ A and B stay live exactly as tested, so they serve as the copy to refer back to.
 | Change | Whose analysis it came from | Finding |
 |---|---|---|
 | **"You already have this" warnings** when typing, scanning or importing an item that's already in the pantry | Senah (Prefers_App) | Believing the app prevents duplicate buys was the only significant predictor of preferring Pantry Pal (+22 points, p = .005) |
-| **Shopping list that checks the pantry**: type an item at the store to see if it's at home, add a recipe's missing ingredients in one tap, shared with the household | Senah (Prefers_App) | Same; themes 3 and 5 (checking stock from the store, whole-household use) |
+| **Shopping list that checks the pantry**: type an item at the store to see if it's at home, add a recipe’s missing ingredients in one tap, share it with family, groups or friends | Senah (Prefers_App) | Same; themes 3 and 5 (checking stock from the store, whole-household use) |
 | **Cook with several items at once**: pick spinach + chicken (or every expiring item) and get recipes ranked by how many they use; two new recipes combine them | Madison (Use_Before_Expire) | B21 let spinach spoil because no recipe used both; theme 4 |
-| **Add groceries is visible right away**: three add options at the top of Home and an Add button on the Pantry screen | Madison (recordings) | Participants explored the page before finding how to add food |
+| **Add groceries is visible right away**: three add options at the top of Home (other actions grouped below as Quick actions) and an Add button on the Pantry screen | Madison (recordings) | Participants explored the page before finding how to add food |
 | **Package sizes you can change**: common sizes as chips (quart / half gallon / gallon) plus a free-text size, on Add, Scan and Receipt | Annabelle (Ease_Track) | Participants were confused by fixed measurements |
 | **Less expiration entry**: shelf life fills in from the storage spot with a note on where it came from; a time set by hand can be saved as your default | Annabelle (Ease_Track, Resourceful) | Ease_Track rose with autofill (+1.43, p = .015); manual dates were the main complaint |
 | **Add a whole shop at once** from a receipt photo or a store order (e.g. Walmart), with sizes and dates filled in | Karen (Effort_Worth) | Effort_Worth fell (−0.46); about half said manual entry cost more time than it saved; B5 asked for receipts |

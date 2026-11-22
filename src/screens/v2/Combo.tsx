@@ -15,7 +15,7 @@ export function Combo() {
     <div className="screen">
       <div className="topbar"><BackButton /><p className="title">Cook with these</p></div>
       <div className="scroll" style={{ gap: 14 }}>
-        <p className="lead" id="combo-label">Pick everything you want to use up. We’ll find recipes that use them together.</p>
+        <span className="label" id="combo-label">Use up</span>
         <div className="chips" role="group" aria-labelledby="combo-label">
           {items.map((p) => {
             const on = state.pick.includes(p.id);

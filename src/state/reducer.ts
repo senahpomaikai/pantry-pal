@@ -53,6 +53,7 @@ export type Action =
   | { type: 'setShopText'; text: string } | { type: 'addShop'; name?: string } | { type: 'removeShop'; name: string } | { type: 'addMissing' }
   | { type: 'goCombo'; ids: number[] } | { type: 'togglePick'; id: number }
   | { type: 'setImportUrl'; url: string } | { type: 'importRecipe' } | { type: 'videoNope' }
+  | { type: 'toggleListShare' } | { type: 'toggleListShareTo'; name: string }
   | { type: 'clearToast'; n: number };
 
 /* ---------- helpers (the prototype's go / back / tab / say) ---------- */
@@ -358,6 +359,8 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'goCombo': return go(st, 'combo', { pick: a.ids });
     case 'togglePick': return { ...st, pick: toggle(st.pick, a.id) };
     case 'setImportUrl': return { ...st, importUrl: a.url };
+    case 'toggleListShare': return { ...st, listShareOpen: !st.listShareOpen };
+    case 'toggleListShareTo': return { ...st, listShareTo: toggle(st.listShareTo, a.name) };
     case 'videoNope': return say(st, 'Step-by-step videos are pretend in this prototype');
     case 'importRecipe': {
       if (!st.importUrl.trim()) return st;

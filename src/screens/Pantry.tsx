@@ -35,7 +35,7 @@ export function Pantry() {
         </div>
         {REVISED && state.pantry.length > 0 && (
           <button className="lrow sky" onClick={() => dispatch({ type: 'goCombo', ids: [] })}>
-            <Icon name="pot" size="sm" /><span className="grow">Pick items to cook together</span><Icon name="chevron" size="sm" />
+            <Icon name="pot" size="sm" /><span className="grow">Cook items together</span><Icon name="chevron" size="sm" />
           </button>
         )}
         {count > 0 && !state.pFiltersOpen && (

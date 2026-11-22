@@ -69,6 +69,6 @@ export function createInitialState(): AppState {
     reminders: true, lead: 2, digest: false, diet: [],
     ...blankForms(),
     bonus: [], rememberDays: false, savedDays: {}, scanQty: scanFood(0).qty, receipt: [], receiptSource: null,
-    shopping: [], shopText: '', pick: [], importUrl: '',
+    shopping: [], shopText: '', pick: [], importUrl: '', listShareOpen: false, listShareTo: [],
   };
 }

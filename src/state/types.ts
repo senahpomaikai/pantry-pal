@@ -204,4 +204,7 @@ export interface AppState {
   /** Pantry items picked to cook with together. */
   pick: number[];
   importUrl: string;
+  /** Shopping list sharing dropdown, and who it is shared with. */
+  listShareOpen: boolean;
+  listShareTo: string[];
 }

@@ -40,8 +40,8 @@ export function RecipeDetail() {
           <h2 className="h2" style={{ marginBottom: 6 }}>Ingredients</h2>
           {REVISED && missing.length > 0 && (
             missing.every((n) => state.shopping.some((x) => x.toLowerCase() === n.toLowerCase()))
-              ? <button className="btn" style={{ marginBottom: 6 }} onClick={() => dispatch({ type: 'go', screen: 'shopping' })}><Icon name="check" size="sm" />On your shopping list</button>
-              : <button className="btn" style={{ marginBottom: 6 }} onClick={() => dispatch({ type: 'addMissing' })}><Icon name="plus" size="sm" />Add {missing.length} missing to my shopping list</button>
+              ? <button className="btn" style={{ marginBottom: 6 }} onClick={() => dispatch({ type: 'go', screen: 'shopping' })}><Icon name="check" size="sm" />On your list</button>
+              : <button className="btn" style={{ marginBottom: 6 }} onClick={() => dispatch({ type: 'addMissing' })}><Icon name="plus" size="sm" />Add {missing.length} to shopping list</button>
           )}
           {rec?.ingRows.map((g) => (
             <div key={g.name} style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 56, padding: '6px 0', borderBottom: '1px solid #EFE3C2' }}>

@@ -71,7 +71,7 @@ const same = (a: string, b: string) => {
 export const duplicateOf = (pantry: PantryItem[], name: string) => (name.trim() ? pantry.find((p) => same(p.name, name)) : undefined);
 
 export const dupLine = (p: PantryItem) =>
-  'You already have ' + (p.qty ? p.qty + ' ' : '') + '· ' + p.loc + ' · ' + (p.days <= 1 ? 'expires ' + expLabel(p.days).toLowerCase() : 'good for ' + expLabel(p.days));
+  'Already have: ' + [p.qty, p.loc, expLabel(p.days)].filter(Boolean).join(' · ');
 
 /* ---------- receipt / store import ---------- */
 

@@ -25,7 +25,7 @@ export function ItemDetail() {
         </div>
         <div className="section">
           <h2 className="h2">Recipes with {item?.lower}</h2>
-          {REVISED && item && <button className="btn" onClick={() => dispatch({ type: 'goCombo', ids: [item.id] })}><Icon name="plus" size="sm" />Use it with other items</button>}
+          {REVISED && item && <button className="btn" onClick={() => dispatch({ type: 'goCombo', ids: [item.id] })}><Icon name="plus" size="sm" />Combine with more</button>}
           {recipes.map((r) => <RecipeRow key={r.id} r={r} onOpen={() => dispatch({ type: 'go', screen: 'recipe', recipeId: r.id })} />)}
           {recipes.length === 0 && (
             <>

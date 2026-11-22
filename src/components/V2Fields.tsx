@@ -20,7 +20,7 @@ export function SizeField({ name, value, onChange, id }: { name: string; value: 
     <div className="field">
       <label className="label" htmlFor={id}>Package size</label>
       {opts.length > 0 && <ChipGroup label="Common sizes" options={chipsOf(opts, value)} onPick={onChange} />}
-      <input id={id} className="input" placeholder="Or type a size, e.g. 24 oz" value={value} onChange={(e) => onChange(e.target.value)} />
+      <input id={id} className="input" placeholder="Other size" value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
@@ -32,11 +32,11 @@ export function DaysHint({ name, loc, byHand, saved }: { name: string; loc: stri
   if (byHand && name.trim()) {
     return (
       <button className="remember" aria-pressed={state.rememberDays} onClick={() => dispatch({ type: 'toggleRemember' })}>
-        <Check on={state.rememberDays} />Remember this for {(food?.name ?? name).toLowerCase()} in the {loc.toLowerCase()}
+        <Check on={state.rememberDays} />Remember for next time
       </button>
     );
   }
-  if (saved) return <span className="small autofill"><Icon name="check" size="xs" />Your saved time for {(food?.name ?? name).toLowerCase()} in the {loc.toLowerCase()}</span>;
-  if (food) return <span className="small autofill"><Icon name="info" size="xs" />Filled in from food-safety guides for the {loc.toLowerCase()}. No need to check the package.</span>;
+  if (saved) return <span className="small autofill"><Icon name="check" size="xs" />Your saved time</span>;
+  if (food) return <span className="small autofill"><Icon name="info" size="xs" />Auto-filled for {loc.toLowerCase()}</span>;
   return null;
 }
