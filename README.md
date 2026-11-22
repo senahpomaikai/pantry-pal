@@ -41,14 +41,16 @@ A and B stay live exactly as tested, so they serve as the copy to refer back to.
 |---|---|---|
 | **"You already have this" warnings** when typing, scanning or importing an item that's already in the pantry | Senah (Prefers_App) | Believing the app prevents duplicate buys was the only significant predictor of preferring Pantry Pal (+22 points, p = .005) |
 | **Shopping list that checks the pantry**: type an item at the store to see if it's at home, add a recipe’s missing ingredients in one tap, share it with family, groups or friends | Senah (Prefers_App) | Same; themes 3 and 5 (checking stock from the store, whole-household use) |
+| **Savings welcome on Home**: money saved and pounds of food not wasted over a recent period, a fresh figure on each load | Senah (Prefers_App) | Preference rose with believing the app prevents wasted money; the app's goal is less waste and more savings |
 | **Cook with several items at once**: pick spinach + chicken (or every expiring item) and get recipes ranked by how many they use; two new recipes combine them | Madison (Use_Before_Expire) | B21 let spinach spoil because no recipe used both; theme 4 |
-| **Add groceries is visible right away**: three add options at the top of Home (other actions grouped below as Quick actions) and an Add button on the Pantry screen | Madison (recordings) | Participants explored the page before finding how to add food |
+| **One clear place to add food**: the Add button opens every way in (Scan receipt, Scan barcode, Say it, Type, Shopping list), and the Pantry screen has its own Add button; Home's other actions are grouped as Quick actions | Madison (recordings) | Participants explored the page before finding how to add food |
 | **Package sizes you can change**: common sizes as chips (quart / half gallon / gallon) plus a free-text size, on Add, Scan and Receipt | Annabelle (Ease_Track) | Participants were confused by fixed measurements |
 | **Less expiration entry**: shelf life fills in from the storage spot with a note on where it came from; a time set by hand can be saved as your default | Annabelle (Ease_Track, Resourceful) | Ease_Track rose with autofill (+1.43, p = .015); manual dates were the main complaint |
 | **Add a whole shop at once** from a receipt photo or a store order (e.g. Walmart), with sizes and dates filled in | Karen (Effort_Worth) | Effort_Worth fell (−0.46); about half said manual entry cost more time than it saved; B5 asked for receipts |
+| **Say it**: speak a grocery ("two half gallons of Horizon milk, expires Friday") and the app picks out item, brand, amount, size and expiration | Karen (Effort_Worth) | Same; participants asked to speak items instead of typing them |
 | **Better recipe discovery**: recipe photos, a step-by-step video, import a recipe from a link | Karen (Ease_Recipe) | Ease_Recipe barely moved (+0.11, p = .87); users asked for images, videos and their own recipes |
 
-The camera, receipt reader, store import and videos are pretend, as the scanner was in A and B.
+The camera, receipt reader, store import, videos and savings figures are pretend, as the scanner was in A and B. Say it uses the browser's speech recognition where it is allowed (Chrome, Safari) and otherwise fills in a sample sentence; the parsing of what was said is real (`parseVoice` in [`src/state/v2.ts`](src/state/v2.ts)).
 
 The step-by-step plan is in [docs/Pantry_Pal_Next_Steps.pdf](docs/Pantry_Pal_Next_Steps.pdf).
 

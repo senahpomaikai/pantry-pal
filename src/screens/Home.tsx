@@ -4,6 +4,10 @@ import { homeGoal, soonItems, topRecipes } from '../state/selectors';
 import { useStore } from '../store';
 import { REVISED } from '../variants';
 import { Photo, foodPhoto } from '../components/Photo';
+import { savingsStat } from '../state/v2';
+
+/** v2: a fresh figure on every page load, so the welcome never goes stale. */
+const SAVED = savingsStat();
 
 export function Home() {
   const { state, dispatch } = useStore();
@@ -21,14 +25,14 @@ export function Home() {
       </div>
       <div className="scroll">
         {REVISED ? (
-          <div className="section" style={{ gap: 8 }}>
-            <h2 className="h2">Add groceries</h2>
-            <div className="addtiles">
-              <button className="addtile primary" onClick={() => dispatch({ type: 'go', screen: 'receipt' })}><Icon name="task" />Scan receipt</button>
-              <button className="addtile" onClick={() => dispatch({ type: 'go', screen: 'scan' })}><Icon name="scan" />Scan barcode</button>
-              <button className="addtile" onClick={() => dispatch({ type: 'go', screen: 'manual' })}><Icon name="pencil" />Type</button>
+          <section className="saved-card" aria-label={'Saved in the last ' + SAVED.period}>
+            <span className="saved-kicker">Welcome back! In the last {SAVED.period}</span>
+            <div className="saved-stats">
+              <div><b>${SAVED.dollars}</b><span>saved</span></div>
+              <div><b>{SAVED.lbs} lbs</b><span>food not wasted</span></div>
             </div>
-          </div>
+            <span className="saved-foot"><Icon name="logo" size="xs" />That’s about {SAVED.meals} meals. Keep it up!</span>
+          </section>
         ) : (
           <button className="btn btn-primary btn-block" style={{ minHeight: 56, fontSize: 17, marginTop: 4 }} onClick={() => dispatch({ type: 'go', screen: 'scan' })}>
             <Icon name="scan" />Scan groceries

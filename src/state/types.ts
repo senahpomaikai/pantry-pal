@@ -5,7 +5,7 @@ export type ScreenName =
   | 'recipes' | 'recipe' | 'cook' | 'useup' | 'create'
   | 'shared' | 'notifs' | 'profile' | 'goals' | 'reminders' | 'diet' | 'help'
   // v2 only
-  | 'receipt' | 'shopping' | 'combo' | 'import';
+  | 'receipt' | 'shopping' | 'combo' | 'import' | 'voice';
 
 export type TabName = 'home' | 'pantry' | 'recipes' | 'profile';
 
@@ -207,4 +207,6 @@ export interface AppState {
   /** Shopping list sharing dropdown, and who it is shared with. */
   listShareOpen: boolean;
   listShareTo: string[];
+  /** What the voice input heard (editable). */
+  voiceText: string;
 }

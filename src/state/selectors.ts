@@ -78,7 +78,7 @@ const TAB_GROUP: Partial<Record<ScreenName, TabName>> = {
   pantry: 'pantry', item: 'pantry', manual: 'pantry', scanResult: 'pantry',
   recipes: 'recipes', recipe: 'recipes',
   profile: 'profile', goals: 'profile', shared: 'profile', reminders: 'profile', diet: 'profile',
-  receipt: 'pantry', shopping: 'home', combo: 'recipes', import: 'recipes',
+  receipt: 'pantry', voice: 'pantry', shopping: 'home', combo: 'recipes', import: 'recipes',
 };
 
 export const tabGroup = (screen: ScreenName): TabName | '' => TAB_GROUP[screen] ?? '';

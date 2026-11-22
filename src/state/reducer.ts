@@ -2,7 +2,7 @@
 import { findFood, scanFood, type Food } from './foods';
 import { itemImpact, recipeImpact } from './impact';
 import { blankDayForm, blankDraft, blankForms, blankLocForm, blankManual } from './seed';
-import { daysKey, importedRecipe, missingFor, receiptLines, shelfLife } from './v2';
+import { daysKey, importedRecipe, missingFor, receiptLines, shelfLife, voiceQty, type VoiceItem } from './v2';
 import {
   draftToRecipe, draftView, findRecipe, locations, cookedCandidates, match, validateDuration, validatePlace,
 } from './selectors';
@@ -53,6 +53,7 @@ export type Action =
   | { type: 'setShopText'; text: string } | { type: 'addShop'; name?: string } | { type: 'removeShop'; name: string } | { type: 'addMissing' }
   | { type: 'goCombo'; ids: number[] } | { type: 'togglePick'; id: number }
   | { type: 'setImportUrl'; url: string } | { type: 'importRecipe' } | { type: 'videoNope' }
+  | { type: 'setVoiceText'; text: string } | { type: 'addVoice'; item: VoiceItem }
   | { type: 'toggleListShare' } | { type: 'toggleListShareTo'; name: string }
   | { type: 'clearToast'; n: number };
 
@@ -359,6 +360,13 @@ export function reducer(st: AppState, a: Action): AppState {
     case 'goCombo': return go(st, 'combo', { pick: a.ids });
     case 'togglePick': return { ...st, pick: toggle(st.pick, a.id) };
     case 'setImportUrl': return { ...st, importUrl: a.url };
+    case 'setVoiceText': return { ...st, voiceText: a.text };
+    case 'addVoice': {
+      const v = a.item, food = findFood(v.name);
+      const loc = food?.loc ?? 'Fridge';
+      const days = v.days ?? shelfLife(st, v.name, loc).days ?? 7;
+      return addItem(st, { name: (v.brand ? v.brand + ' ' : '') + v.name, qty: voiceQty(v), loc, days }, { voiceText: '' });
+    }
     case 'toggleListShare': return { ...st, listShareOpen: !st.listShareOpen };
     case 'toggleListShareTo': return { ...st, listShareTo: toggle(st.listShareTo, a.name) };
     case 'videoNope': return say(st, 'Step-by-step videos are pretend in this prototype');
